@@ -90,23 +90,29 @@ undefined_sanitizer: test_predicate_ubsan
 analyzer: test_predicate_analyzer
 	$(addprefix ./,$<)
 
+test_predicate_asan: LDFLAGS += $(ASAN_FLAGS)
 test_predicate_asan: test_predicate_asan.o
-	$(CXXLD) $(LDFLAGS) $(ASAN_FLAGS) -o $@ $^
+	$(CXXLD) $(LDFLAGS) -o $@ $^
 
+test_predicate_ubsan: LDFLAGS += $(UBSAN_FLAGS)
 test_predicate_ubsan: test_predicate_ubsan.o
-	$(CXXLD) $(LDFLAGS) $(UBSAN_FLAGS) -o $@ $^
+	$(CXXLD) $(LDFLAGS) -o $@ $^
 
+test_predicate_analyzer: LDFLAGS += $(ANALYZER_FLAGS)
 test_predicate_analyzer: test_predicate_analyzer.o
-	$(CXXLD) $(LDFLAGS) $(ANALYZER_FLAGS) -o $@ $^
+	$(CXXLD) $(LDFLAGS) -o $@ $^
 
+%_asan.o: CXXFLAGS += $(ASAN_FLAGS)
 %_asan.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(ASAN_FLAGS) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
+%_ubsan.o: CXXFLAGS += $(UBSAN_FLAGS)
 %_ubsan.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(UBSAN_FLAG) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
+%_analyzer.o: CXXFLAGS += $(ANALYZER_FLAGS)
 %_analyzer.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(ANALYZER_FLAG) -c -o $@ $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 clean:
 	rm test_predicate test_predicate_asan test_predicate_ubsan test_predicate_analyzer *.o
