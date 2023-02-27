@@ -372,7 +372,8 @@ namespace impl {
 
 namespace helper {
 
-bool MatcherHelperAll(std::vector<bool>&& results)
+__attribute__((__pure__))
+inline bool MatcherHelperAll(std::vector<bool>&& results)
 {
   bool result = true;
 
@@ -383,7 +384,8 @@ bool MatcherHelperAll(std::vector<bool>&& results)
   return result;
 }
 
-bool MatcherHelperNone(std::vector<bool>&& results)
+__attribute__((__pure__))
+inline bool MatcherHelperNone(std::vector<bool>&& results)
 {
   bool result = false;
 
@@ -394,7 +396,8 @@ bool MatcherHelperNone(std::vector<bool>&& results)
   return !result;
 }
 
-bool MatcherHelperAny(std::vector<bool>&& results)
+__attribute__((__pure__))
+inline bool MatcherHelperAny(std::vector<bool>&& results)
 {
   for (auto r : results) {
     if (r) {
@@ -405,7 +408,8 @@ bool MatcherHelperAny(std::vector<bool>&& results)
   return false;
 }
 
-bool MatcherHelperOne(std::vector<bool>&& results)
+__attribute__((__pure__))
+inline bool MatcherHelperOne(std::vector<bool>&& results)
 {
   bool result = false;
 
