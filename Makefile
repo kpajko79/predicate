@@ -1,11 +1,39 @@
-CPP := clang
-CC := clang
-CXX := clang++
-CXXLD := clang++
+CPP := gcc
+CC := gcc
+CXX := g++
+CXXLD := g++
 
 CPPFLAGS := -I.
 
-COMMON_FLAGS := -Og -ggdb3 -ftrapv
+COMMON_FLAGS := -Og -ggdb3 -ftrapv -pedantic \
+	-Wall \
+	-Wextra \
+	-Wdouble-promotion \
+	-Wformat=2 \
+	-Wformat-overflow=2 \
+	-Wmisleading-indentation \
+	-Wmultistatement-macros \
+	-Wstrict-aliasing \
+	-Wsuggest-attribute=pure \
+	-Wsuggest-attribute=const \
+	-Wsuggest-attribute=malloc \
+	-Wsuggest-attribute=format \
+	-Wvla-parameter \
+	-Warray-bounds \
+	-Wduplicated-branches \
+	-Wduplicated-cond \
+	-Wtrampolines \
+	-Wfloat-equal \
+	-Wshadow=global \
+	-Wpedantic \
+	-Wcast-qual \
+	-Wcast-align \
+	-Wconversion \
+	-Warith-conversion \
+	-Wlogical-op \
+	-Warray-parameter \
+	-Wno-float-equal \
+	-Wno-c99-extension
 
 ASAN_FLAGS := \
 	$(COMMON_FLAGS) \
