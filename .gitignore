@@ -1,0 +1,4 @@
+test_predicate
+test_predicate_asan
+test_predicate_ubsan
+*.o
