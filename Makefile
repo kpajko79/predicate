@@ -64,6 +64,11 @@ UBSAN_FLAGS := \
 	-fsanitize=vptr \
 	-fsanitize=pointer-overflow
 
+ANALYZER_FLAGS := \
+	$(COMMON_FLAGS) \
+	-fanalyzer \
+	-Wanalyzer-too-complex
+
 # gcc only
 #	-fsanitize=bounds-strict \
 
@@ -74,12 +79,15 @@ CXXFLAGS += -std=c++11
 
 LDFLAGS :=
 
-all: test_predicate address_sanitizer undefined_sanitizer
+all: test_predicate address_sanitizer undefined_sanitizer analyzer
 
 address_sanitizer: test_predicate_asan
 	$(addprefix ./,$<)
 
 undefined_sanitizer: test_predicate_ubsan
+	$(addprefix ./,$<)
+
+analyzer: test_predicate_analyzer
 	$(addprefix ./,$<)
 
 test_predicate_asan: test_predicate_asan.o
@@ -88,11 +96,17 @@ test_predicate_asan: test_predicate_asan.o
 test_predicate_ubsan: test_predicate_ubsan.o
 	$(CXXLD) $(LDFLAGS) $(UBSAN_FLAGS) -o $@ $^
 
+test_predicate_analyzer: test_predicate_analyzer.o
+	$(CXXLD) $(LDFLAGS) $(ANALYZER_FLAGS) -o $@ $^
+
 %_asan.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(ASAN_FLAGS) -c -o $@ $<
 
 %_ubsan.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(UBSAN_FLAG) -c -o $@ $<
 
+%_analyzer.o: %.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(ANALYZER_FLAG) -c -o $@ $<
+
 clean:
-	rm test_predicate test_predicate_asan test_predicate_ubsan *.o
+	rm test_predicate test_predicate_asan test_predicate_ubsan test_predicate_analyzer *.o
