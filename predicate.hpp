@@ -28,13 +28,13 @@
 #include <memory>
 #include <cstdint>
 #include <cstring>
-#include <sstream>
 #include <functional>
 #include <type_traits>
 #include <vector>
 #include <cmath>
 
 #include "integer_sequence.hpp"
+#include "handicap_ostringstream.hpp"
 
 namespace pajko {
 
@@ -46,7 +46,7 @@ public:
   virtual ~Encapsulator() noexcept = default;
   virtual const void* fetch() const noexcept = 0;
 
-  operator const void*() const {
+  operator const void*() const noexcept {
     return this;
   }
 
@@ -108,47 +108,14 @@ template <typename T>
 inline
 auto Encapsulate(T&& what) noexcept ->
   typename std::enable_if<
-    !std::is_pointer<
-      typename std::decay<T>::type
-    >::value &&
-    (std::alignment_of<T>::value > 1),
+    !std::is_pointer<typename std::decay<T>::type>::value,
     impl::EncapsulatorImpl<T>
   >::type
 {
   return impl::EncapsulatorImpl<T>(std::move(what));
 }
 
-template <typename T>
-inline
-auto Encapsulate(T&& what) noexcept ->
-  typename std::enable_if<
-    !std::is_pointer<
-      typename std::decay<T>::type
-    >::value &&
-    std::alignment_of<T>::value == 1 &&
-    std::is_signed<T>::value,
-    impl::EncapsulatorImpl<signed int>
-  >::type
-{
-  return impl::EncapsulatorImpl<signed int>(std::move(what));
-}
-
-template <typename T>
-inline
-auto Encapsulate(T&& what) noexcept ->
-  typename std::enable_if<
-    !std::is_pointer<
-      typename std::decay<T>::type
-    >::value &&
-    std::alignment_of<T>::value == 1 &&
-    std::is_unsigned<T>::value,
-    impl::EncapsulatorImpl<unsigned int>
-  >::type
-{
-  return impl::EncapsulatorImpl<unsigned int>(std::move(what));
-}
-
-void ForgetPredicates()
+inline void ForgetPredicates() noexcept
 {
   impl::holder.clear();
 }
@@ -204,13 +171,13 @@ private:
 }; /* namespace impl */
 
 template <typename... T>
-const void* WithArgs(std::function<bool(const Encapsulator& arg, T...)>&& func, T&&... args)
+inline const void* WithArgs(std::function<bool(const Encapsulator& arg, T...)>&& func, T&&... args) noexcept
 {
   return impl::WithArgsImpl<T...>::create(std::move(func), std::forward<T>(args)...);
 }
 
 template <typename... T>
-const void* WithArgs(bool(*func)(const Encapsulator& arg, T...), T&&... args)
+inline const void* WithArgs(bool(*func)(const Encapsulator& arg, T...), T&&... args) noexcept
 {
   return impl::WithArgsImpl<T...>::create(func, std::forward<T>(args)...);
 }
@@ -269,7 +236,7 @@ private:                                                                        
 }; /* namespace impl */                                                                                       \
                                                                                                               \
 template <typename T>                                                                                         \
-const void* name(T&& func)                                                                                    \
+inline const void* name(T&& func) noexcept                                                                    \
 {                                                                                                             \
   return impl::name ## Impl<T>::create(std::move(func));                                                      \
 }
@@ -339,7 +306,7 @@ private:                                                                        
 }; /* namespace impl */                                                                                                        \
                                                                                                                                \
 template<typename... T>                                                                                                        \
-const void* Match ## name(T&&... funcs)                                                                                        \
+inline const void* Match ## name(T&&... funcs) noexcept                                                                        \
 {                                                                                                                              \
   return impl::Match ## name ## Impl<T...>::create(std::forward<T>(funcs)...);                                                 \
 }
@@ -348,8 +315,7 @@ namespace impl {
 
 namespace helper {
 
-__attribute__((__pure__))
-inline bool MatcherHelperAll(std::vector<bool>&& results)
+inline bool MatcherHelperAll(std::vector<bool>&& results) noexcept
 {
   bool result = true;
 
@@ -360,8 +326,7 @@ inline bool MatcherHelperAll(std::vector<bool>&& results)
   return result;
 }
 
-__attribute__((__pure__))
-inline bool MatcherHelperNone(std::vector<bool>&& results)
+inline bool MatcherHelperNone(std::vector<bool>&& results) noexcept
 {
   bool result = false;
 
@@ -372,8 +337,7 @@ inline bool MatcherHelperNone(std::vector<bool>&& results)
   return !result;
 }
 
-__attribute__((__pure__))
-inline bool MatcherHelperAny(std::vector<bool>&& results)
+inline bool MatcherHelperAny(std::vector<bool>&& results) noexcept
 {
   for (auto r : results) {
     if (r) {
@@ -384,8 +348,7 @@ inline bool MatcherHelperAny(std::vector<bool>&& results)
   return false;
 }
 
-__attribute__((__pure__))
-inline bool MatcherHelperOne(std::vector<bool>&& results)
+inline bool MatcherHelperOne(std::vector<bool>&& results) noexcept
 {
   bool result = false;
 
@@ -444,32 +407,6 @@ private:
   const T* _arg;
 };
 
-}; /* namespace impl */
-
-template <typename T, size_t N>
-inline
-auto IsEqual(const T (&arg)[N]) noexcept ->
-  typename std::enable_if<
-    (N > 0),
-     const void*
-  >::type
-{
-  return impl::IsEqualImpl<T, N>::checker(arg);
-}
-
-template <typename T, size_t N>
-inline
-auto IsEqual(T (&&arg)[N]) noexcept ->
-  typename std::enable_if<
-    (N > 0),
-     const void*
-  >::type
-{
-  return impl::IsEqualImpl<T, N>::checker(arg);
-}
-
-namespace impl {
-
 template <typename T>
 class IsEqualImpl<T, 0> : public Predicate
 {
@@ -489,7 +426,7 @@ public:
     T val = *(reinterpret_cast<const T*>(what.fetch()));
     auto result = val == _arg;
     if (!result) {
-      std::ostringstream msg;
+      handicap::ostringstream msg;
       msg << "Predicate IsEqual(" << _arg << ") failed for value " << val;
       fprintf(stderr, "%s\n", msg.str().c_str());
     }
@@ -508,39 +445,29 @@ private:
 
 }; /* namespace impl */
 
+template <typename T, size_t N>
+inline
+const void* IsEqual(const T (&arg)[N]) noexcept
+{
+  return impl::IsEqualImpl<T, N>::checker(arg);
+}
+
+template <typename T, size_t N>
+inline
+const void* IsEqual(T (&&arg)[N]) noexcept
+{
+  return impl::IsEqualImpl<T, N>::checker(arg);
+}
+
 template <typename T>
 inline
 auto IsEqual(T&& param) noexcept ->
   typename std::enable_if<
-    (std::alignment_of<T>::value > 1),
+    !std::is_pointer<typename std::decay<T>::type>::value,
     const void*
   >::type
 {
   return impl::IsEqualImpl<T, 0>::checker(std::move(param));
-}
-
-template <typename T>
-inline
-auto IsEqual(T&& param) noexcept ->
-  typename std::enable_if<
-    std::alignment_of<T>::value == 1 &&
-    std::is_signed<T>::value,
-    const void*
-  >::type
-{
-  return impl::IsEqualImpl<signed int, 0>::checker(std::move(param));
-}
-
-template <typename T>
-inline
-auto IsEqual(T&& param) noexcept ->
-  typename std::enable_if<
-    std::alignment_of<T>::value == 1 &&
-    std::is_unsigned<T>::value,
-    const void*
-  >::type
-{
-  return impl::IsEqualImpl<unsigned int, 0>::checker(std::move(param));
 }
 
 #define FILTER_GENERATOR(name, filter)                                                          \
@@ -559,9 +486,9 @@ public:                                                                         
   bool execute(const Encapsulator& what) const noexcept override                                \
   {                                                                                             \
     T val = *(reinterpret_cast<const T*>(what.fetch()));                                        \
-    auto result = [](T arg){filter}(val);                                                       \
+    auto result = [](T arg) noexcept {filter}(val);                                             \
     if (!result) {                                                                              \
-      std::ostringstream msg;                                                                   \
+      handicap::ostringstream msg;                                                              \
       msg << "Predicate " #name "() failed for value " << val;                                  \
       fprintf(stderr, "%s\n", msg.str().c_str());                                               \
     }                                                                                           \
@@ -579,37 +506,9 @@ private:                                                                        
                                                                                                 \
 template <typename T>                                                                           \
 inline                                                                                          \
-auto name() noexcept ->                                                                         \
-  typename std::enable_if<                                                                      \
-    (std::alignment_of<T>::value > 1),                                                          \
-    const void*                                                                                 \
-  >::type                                                                                       \
+const void* name() noexcept                                                                     \
 {                                                                                               \
   return impl::name ## Impl<T>::checker();                                                      \
-}                                                                                               \
-                                                                                                \
-template <typename T>                                                                           \
-inline                                                                                          \
-auto name() noexcept ->                                                                         \
-  typename std::enable_if<                                                                      \
-    std::alignment_of<T>::value == 1 &&                                                         \
-    std::is_signed<T>::value,                                                                   \
-    const void*                                                                                 \
-  >::type                                                                                       \
-{                                                                                               \
-  return impl::name ## Impl<signed int>::checker();                                             \
-}                                                                                               \
-                                                                                                \
-template <typename T>                                                                           \
-inline                                                                                          \
-auto name() noexcept ->                                                                         \
-  typename std::enable_if<                                                                      \
-    std::alignment_of<T>::value == 1 &&                                                         \
-    std::is_unsigned<T>::value,                                                                 \
-    const void*                                                                                 \
-  >::type                                                                                       \
-{                                                                                               \
-  return impl::name ## Impl<unsigned int>::checker();                                           \
 }
 
 namespace impl {
@@ -617,7 +516,7 @@ namespace impl {
 namespace helper {
 
 template <typename T>
-inline auto IsOddHelper(T&& arg) ->
+inline auto IsOddHelper(T&& arg) noexcept ->
   typename std::enable_if<
     std::is_integral<T>::value, bool
   >::type
@@ -626,7 +525,7 @@ inline auto IsOddHelper(T&& arg) ->
 }
 
 template <typename T>
-inline auto IsOddHelper(T&& arg) ->
+inline auto IsOddHelper(T&& arg) noexcept ->
   typename std::enable_if<
     std::is_same<T, double>::value, bool
   >::type
@@ -636,7 +535,17 @@ inline auto IsOddHelper(T&& arg) ->
 }
 
 template <typename T>
-inline auto IsOddHelper(T&& arg) ->
+inline auto IsOddHelper(T&& arg) noexcept ->
+  typename std::enable_if<
+    std::is_same<T, long double>::value, bool
+  >::type
+{
+  // yuck
+  return fmodl(arg, 2.0) == 1.0;
+}
+
+template <typename T>
+inline auto IsOddHelper(T&& arg) noexcept ->
   typename std::enable_if<
     std::is_same<T, float>::value, bool
   >::type
@@ -646,7 +555,7 @@ inline auto IsOddHelper(T&& arg) ->
 }
 
 template <typename T>
-inline auto IsEvenHelper(T&& arg) ->
+inline auto IsEvenHelper(T&& arg) noexcept ->
   typename std::enable_if<
     std::is_integral<T>::value, bool
   >::type
@@ -655,7 +564,7 @@ inline auto IsEvenHelper(T&& arg) ->
 }
 
 template <typename T>
-inline auto IsEvenHelper(T&& arg) ->
+inline auto IsEvenHelper(T&& arg) noexcept ->
   typename std::enable_if<
     std::is_same<T, double>::value, bool
   >::type
@@ -665,7 +574,17 @@ inline auto IsEvenHelper(T&& arg) ->
 }
 
 template <typename T>
-inline auto IsEvenHelper(T&& arg) ->
+inline auto IsEvenHelper(T&& arg) noexcept ->
+  typename std::enable_if<
+    std::is_same<T, long double>::value, bool
+  >::type
+{
+  // yuck
+  return fmodl(arg, 2.0) == 0.0;
+}
+
+template <typename T>
+inline auto IsEvenHelper(T&& arg) noexcept ->
   typename std::enable_if<
     std::is_same<T, float>::value, bool
   >::type
@@ -708,9 +627,9 @@ public:                                                                         
   bool execute(const Encapsulator& what) const noexcept override                                \
   {                                                                                             \
     T val = *(reinterpret_cast<const T*>(what.fetch()));                                        \
-    auto result = [](T arg, T param){filter}(val, _param);                                      \
+    auto result = [](T arg, T param) noexcept {filter}(val, _param);                            \
     if (!result) {                                                                              \
-      std::ostringstream msg;                                                                   \
+      handicap::ostringstream msg;                                                              \
       msg << "Predicate " #name "(" << _param << ") failed for value " << val;                  \
       fprintf(stderr, "%s\n", msg.str().c_str());                                               \
     }                                                                                           \
@@ -731,37 +650,9 @@ private:                                                                        
                                                                                                 \
 template <typename T>                                                                           \
 inline                                                                                          \
-auto name(T&& param) noexcept ->                                                                \
-  typename std::enable_if<                                                                      \
-    (std::alignment_of<T>::value > 1),                                                          \
-    const void*                                                                                 \
-  >::type                                                                                       \
+const void* name(T&& param) noexcept                                                            \
 {                                                                                               \
   return impl::name ## Impl<T>::checker(std::move(param));                                      \
-}                                                                                               \
-                                                                                                \
-template <typename T>                                                                           \
-inline                                                                                          \
-auto name(T&& param) noexcept ->                                                                \
-  typename std::enable_if<                                                                      \
-    std::alignment_of<T>::value == 1 &&                                                         \
-    std::is_signed<T>::value,                                                                   \
-    const void*                                                                                 \
-  >::type                                                                                       \
-{                                                                                               \
-  return impl::name ## Impl<signed int>::checker(std::move(param));                             \
-}                                                                                               \
-                                                                                                \
-template <typename T>                                                                           \
-inline                                                                                          \
-auto name(T&& param) noexcept ->                                                                \
-  typename std::enable_if<                                                                      \
-    std::alignment_of<T>::value == 1 &&                                                         \
-    std::is_unsigned<T>::value,                                                                 \
-    const void*                                                                                 \
-  >::type                                                                                       \
-{                                                                                               \
-  return impl::name ## Impl<unsigned int>::checker(std::move(param));                           \
 }
 
 namespace impl {
@@ -769,7 +660,7 @@ namespace impl {
 namespace helper {
 
 template <typename T>
-inline auto IsDivisibleByHelper(T&& arg, T&& param) ->
+inline auto IsDivisibleByHelper(T&& arg, T&& param) noexcept ->
   typename std::enable_if<
     std::is_integral<T>::value, bool
   >::type
@@ -778,7 +669,7 @@ inline auto IsDivisibleByHelper(T&& arg, T&& param) ->
 }
 
 template <typename T>
-inline auto IsDivisibleByHelper(T&& arg, T&& param) ->
+inline auto IsDivisibleByHelper(T&& arg, T&& param) noexcept ->
   typename std::enable_if<
     std::is_same<T, double>::value, bool
   >::type
@@ -788,7 +679,17 @@ inline auto IsDivisibleByHelper(T&& arg, T&& param) ->
 }
 
 template <typename T>
-inline auto IsDivisibleByHelper(T&& arg, T&& param) ->
+inline auto IsDivisibleByHelper(T&& arg, T&& param) noexcept ->
+  typename std::enable_if<
+    std::is_same<T, long double>::value, bool
+  >::type
+{
+  // yuck
+  return fmodl(arg, param) == 0.0;
+}
+
+template <typename T>
+inline auto IsDivisibleByHelper(T&& arg, T&& param) noexcept ->
   typename std::enable_if<
     std::is_same<T, float>::value, bool
   >::type
@@ -830,9 +731,9 @@ public:                                                                         
   bool execute(const Encapsulator& what) const noexcept override                                         \
   {                                                                                                      \
     T val = *(reinterpret_cast<const T*>(what.fetch()));                                                 \
-    auto result = [](T arg, T param1, T param2){filter}(val, _p1, _p2);                                  \
+    auto result = [](T arg, T param1, T param2) noexcept {filter}(val, _p1, _p2);                        \
     if (!result) {                                                                                       \
-      std::ostringstream msg;                                                                            \
+      handicap::ostringstream msg;                                                                       \
       msg << "Predicate " #name "(" << _p1 << ", " << _p2 << ") failed for value " << val;               \
       fprintf(stderr, "%s\n", msg.str().c_str());                                                        \
     }                                                                                                    \
@@ -855,37 +756,9 @@ private:                                                                        
                                                                                                          \
 template <typename T>                                                                                    \
 inline                                                                                                   \
-auto name(T&& p1, T&& p2) noexcept ->                                                                    \
-  typename std::enable_if<                                                                               \
-    (std::alignment_of<T>::value > 1),                                                                   \
-    const void*                                                                                          \
-  >::type                                                                                                \
+const void* name(T&& p1, T&& p2) noexcept                                                                \
 {                                                                                                        \
   return impl::name ## Impl<T>::checker(std::move(p1), std::move(p2));                                   \
-}                                                                                                        \
-                                                                                                         \
-template <typename T>                                                                                    \
-inline                                                                                                   \
-auto name(T&& p1, T&& p2) noexcept ->                                                                    \
-  typename std::enable_if<                                                                               \
-    std::alignment_of<T>::value == 1 &&                                                                  \
-    std::is_signed<T>::value,                                                                            \
-    const void*                                                                                          \
-  >::type                                                                                                \
-{                                                                                                        \
-  return impl::name ## Impl<signed int>::checker(std::move(p1), std::move(p2));                          \
-}                                                                                                        \
-                                                                                                         \
-template <typename T>                                                                                    \
-inline                                                                                                   \
-auto name(T&& p1, T&& p2) noexcept ->                                                                    \
-  typename std::enable_if<                                                                               \
-    std::alignment_of<T>::value == 1 &&                                                                  \
-    std::is_unsigned<T>::value,                                                                          \
-    const void*                                                                                          \
-  >::type                                                                                                \
-{                                                                                                        \
-  return impl::name ## Impl<unsigned int>::checker(std::move(p1), std::move(p2));                        \
 }
 
 FILTER_GENERATOR_2PARAM(InBetween, return arg >= param1 && arg <= param2;)

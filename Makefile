@@ -3,7 +3,9 @@ CC := gcc
 CXX := g++
 CXXLD := g++
 
-CPPFLAGS := -I.
+RM := rm -f
+
+CPPFLAGS := -I. -MMD
 
 COMMON_FLAGS := -Og -ggdb3 -ftrapv -pedantic \
 	-Wall \
@@ -115,4 +117,8 @@ test_predicate_analyzer: test_predicate_analyzer.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm test_predicate test_predicate_asan test_predicate_ubsan test_predicate_analyzer *.o
+	$(RM) test_predicate test_predicate_asan test_predicate_ubsan test_predicate_analyzer *.o *.d
+
+%.d:
+
+-include *.d
