@@ -25,6 +25,13 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
+#include <cstdio>
+
+#define PKO_PREDICATE_LOGGER_HELPER(result, str)        \
+{                                                       \
+  fprintf(stderr, "%s\n", str);                         \
+}
+
 #include <predicate.hpp>
 
 using namespace pajko;
@@ -34,28 +41,28 @@ template <typename T>
 bool testfunc(const Encapsulator& arg)
 {
   auto& val = *(reinterpret_cast<const T*>(arg.fetch()));
-  return val == 42;
+  return PKO_PREDICATE_LOGGER(val == 42, val << " is not fourtytwo");
 }
 
 template <typename T>
 bool iseven(const Encapsulator& arg)
 {
   auto& val = *(reinterpret_cast<const T*>(arg.fetch()));
-  return (val % 2) == 0;
+  return PKO_PREDICATE_LOGGER((val % 2) == 0, val << " is not even");
 }
 
 template <typename T>
 bool isgt10(const Encapsulator& arg)
 {
   auto& val = *(reinterpret_cast<const T*>(arg.fetch()));
-  return val > 10;
+  return PKO_PREDICATE_LOGGER(val > 10, val << " is not greater than ten");
 }
 
 template <typename T>
 bool isbetween(const Encapsulator& arg, T low, T high)
 {
   auto& val = *(reinterpret_cast<const T*>(arg.fetch()));
-  return val >= low && val <= high;
+  return PKO_PREDICATE_LOGGER(val >= low && val <= high, val << " is not between " << low << " and " << high);
 }
 
 #define evalhelper(p) \

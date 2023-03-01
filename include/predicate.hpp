@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include <cstdio>
 #include <memory>
 #include <cstdint>
 #include <cstring>
@@ -39,6 +38,21 @@
 namespace pajko {
 
 namespace Predicate {
+
+#if !defined(PKO_PREDICATE_LOGGER_HELPER)
+#define PKO_PREDICATE_LOGGER(result, text)                              \
+[&](){ return result; }()
+#else
+#define PKO_PREDICATE_LOGGER(result, text)                              \
+[&](){                                                                  \
+  auto _result = (result);                                              \
+  if (!_result) {                                                       \
+    const auto& msg = (handicap::ostringstream{} << text).str();        \
+    PKO_PREDICATE_LOGGER_HELPER(_result, msg.c_str());                  \
+  }                                                                     \
+  return _result;                                                       \
+}()
+#endif
 
 class Encapsulator
 {
@@ -430,13 +444,7 @@ public:
   bool execute(const Encapsulator& what) const noexcept override
   {
     auto val = Decapsulate<T>(what);
-    auto result = val == _arg;
-    if (!result) {
-      handicap::ostringstream msg;
-      msg << "Predicate IsEqual(" << _arg << ") failed for value " << val;
-      fprintf(stderr, "%s\n", msg.str().c_str());
-    }
-    return result;
+    return PKO_PREDICATE_LOGGER(val == _arg, "Predicate IsEqual(" << _arg << ") failed for value " << val);
   }
 
   ~IsEqualImpl() noexcept override = default;
@@ -493,11 +501,7 @@ public:                                                                         
   {                                                                                             \
     auto val = Decapsulate<T>(what);                                                            \
     auto result = [](T arg) noexcept {filter}(val);                                             \
-    if (!result) {                                                                              \
-      handicap::ostringstream msg;                                                              \
-      msg << "Predicate " #name "() failed for value " << val;                                  \
-      fprintf(stderr, "%s\n", msg.str().c_str());                                               \
-    }                                                                                           \
+    PKO_PREDICATE_LOGGER(result, "Predicate " #name "() failed for value " << val);             \
     return result;                                                                              \
   }                                                                                             \
                                                                                                 \
@@ -634,11 +638,7 @@ public:                                                                         
   {                                                                                             \
     auto val = Decapsulate<T>(what);                                                            \
     auto result = [](T arg, T param) noexcept {filter}(val, _param);                            \
-    if (!result) {                                                                              \
-      handicap::ostringstream msg;                                                              \
-      msg << "Predicate " #name "(" << _param << ") failed for value " << val;                  \
-      fprintf(stderr, "%s\n", msg.str().c_str());                                               \
-    }                                                                                           \
+    PKO_PREDICATE_LOGGER(result, "Predicate " #name "(" << _param << ") failed for value " << val); \
     return result;                                                                              \
   }                                                                                             \
                                                                                                 \
@@ -738,11 +738,7 @@ public:                                                                         
   {                                                                                                      \
     auto val = Decapsulate<T>(what);                                                                     \
     auto result = [](T arg, T param1, T param2) noexcept {filter}(val, _p1, _p2);                        \
-    if (!result) {                                                                                       \
-      handicap::ostringstream msg;                                                                       \
-      msg << "Predicate " #name "(" << _p1 << ", " << _p2 << ") failed for value " << val;               \
-      fprintf(stderr, "%s\n", msg.str().c_str());                                                        \
-    }                                                                                                    \
+    PKO_PREDICATE_LOGGER(result, "Predicate " #name "(" << _p1 << ", " << _p2 << ") failed for value " << val); \
     return result;                                                                                       \
   }                                                                                                      \
                                                                                                          \
@@ -782,3 +778,5 @@ bool PredicateExecHelper(const void* expected, const void* actual) noexcept
 }
 
 }; /* namespace pajko */
+
+// leave PKO_PREDICATE_LOGGER macro available for external use
