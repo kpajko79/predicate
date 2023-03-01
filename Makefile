@@ -9,7 +9,7 @@ MKDIR := mkdir -p
 
 BUILD_DIR := build
 
-CPPFLAGS := -I. -MMD
+CPPFLAGS := -I. -Iinclude -MMD
 
 COMMON_FLAGS := -Og -ggdb3 -ftrapv -pedantic \
 	-Wall \
