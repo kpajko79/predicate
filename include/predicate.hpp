@@ -41,10 +41,10 @@ namespace Predicate {
 
 #if !defined(PKO_PREDICATE_LOGGER_HELPER)
 #define PKO_PREDICATE_LOGGER(result, text)                              \
-[&](){ return result; }()
+[&]() noexcept { return result; }()
 #else
 #define PKO_PREDICATE_LOGGER(result, text)                              \
-[&](){                                                                  \
+[&]() noexcept {                                                        \
   auto _result = (result);                                              \
   if (!_result) {                                                       \
     const auto& msg = (handicap::ostringstream{} << text).str();        \
