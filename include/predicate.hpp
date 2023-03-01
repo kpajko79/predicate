@@ -202,7 +202,7 @@ inline const void* WithArgs(bool(*func)(const Encapsulator& arg, T...), T&&... a
   return impl::WithArgsImpl<T...>::create(func, std::forward<T>(args)...);
 }
 
-#define EVAL_GENERATOR(name, val)                                                                             \
+#define PKO_PREDICATE_EVAL_GENERATOR(name, val)                                                               \
 namespace impl {                                                                                              \
                                                                                                               \
 template <typename T>                                                                                         \
@@ -261,12 +261,12 @@ inline const void* name(T&& func) noexcept                                      
   return impl::name ## Impl<T>::create(std::move(func));                                                      \
 }
 
-EVAL_GENERATOR(Obey, true)
-EVAL_GENERATOR(Resist, false)
+PKO_PREDICATE_EVAL_GENERATOR(Obey, true)
+PKO_PREDICATE_EVAL_GENERATOR(Resist, false)
 
-#undef EVAL_GENERATOR
+#undef PKO_PREDICATE_EVAL_GENERATOR
 
-#define MATCHER_GENERATOR(name)                                                                                                \
+#define PKO_PREDICATE_MATCHER_GENERATOR(name)                                                                                  \
 namespace impl {                                                                                                               \
                                                                                                                                \
 template<typename... T>                                                                                                        \
@@ -389,12 +389,12 @@ inline bool MatcherHelperOne(std::vector<bool>&& results) noexcept
 
 }; /* namespace impl */
 
-MATCHER_GENERATOR(All)
-MATCHER_GENERATOR(Any)
-MATCHER_GENERATOR(One)
-MATCHER_GENERATOR(None)
+PKO_PREDICATE_MATCHER_GENERATOR(All)
+PKO_PREDICATE_MATCHER_GENERATOR(Any)
+PKO_PREDICATE_MATCHER_GENERATOR(One)
+PKO_PREDICATE_MATCHER_GENERATOR(None)
 
-#undef MATCHER_GENERATOR
+#undef PKO_PREDICATE_MATCHER_GENERATOR
 
 namespace impl {
 
@@ -484,7 +484,7 @@ auto IsEqual(T&& param) noexcept ->
   return impl::IsEqualImpl<T, 0>::checker(std::move(param));
 }
 
-#define FILTER_GENERATOR(name, filter)                                                          \
+#define PKO_PREDICATE_FILTER_GENERATOR(name, filter)                                            \
 namespace impl {                                                                                \
                                                                                                 \
 template <typename T>                                                                           \
@@ -608,16 +608,16 @@ inline auto IsEvenHelper(T&& arg) noexcept ->
 }; /* namespace impl */
 
 // auto in lambda would be C++14
-FILTER_GENERATOR(IsOdd, return helper::IsOddHelper(std::move(arg));)
-FILTER_GENERATOR(IsEven, return helper::IsEvenHelper(std::move(arg));)
-FILTER_GENERATOR(IsZero, return arg == 0;)
-FILTER_GENERATOR(IsNonZero, return arg != 0;)
-FILTER_GENERATOR(IsPositive, return arg > 0;)
-FILTER_GENERATOR(IsNegative, return arg < 0;)
+PKO_PREDICATE_FILTER_GENERATOR(IsOdd, return helper::IsOddHelper(std::move(arg));)
+PKO_PREDICATE_FILTER_GENERATOR(IsEven, return helper::IsEvenHelper(std::move(arg));)
+PKO_PREDICATE_FILTER_GENERATOR(IsZero, return arg == 0;)
+PKO_PREDICATE_FILTER_GENERATOR(IsNonZero, return arg != 0;)
+PKO_PREDICATE_FILTER_GENERATOR(IsPositive, return arg > 0;)
+PKO_PREDICATE_FILTER_GENERATOR(IsNegative, return arg < 0;)
 
-#undef FILTER_GENERATOR
+#undef PKO_PREDICATE_FILTER_GENERATOR
 
-#define FILTER_GENERATOR_PARAM(name, filter)                                                    \
+#define PKO_PREDICATE_FILTER_GENERATOR_PARAM(name, filter)                                      \
 namespace impl {                                                                                \
                                                                                                 \
 template <typename T>                                                                           \
@@ -709,15 +709,15 @@ inline auto IsDivisibleByHelper(T&& arg, T&& param) noexcept ->
 }; /* namespace impl */
 
 // auto in lambda would be C++14
-FILTER_GENERATOR_PARAM(IsDivisibleBy, return helper::IsDivisibleByHelper(std::move(arg), std::move(param));)
-FILTER_GENERATOR_PARAM(IsLesserThan, return arg < param;)
-FILTER_GENERATOR_PARAM(IsLesserEq, return arg <= param;)
-FILTER_GENERATOR_PARAM(IsGreaterThan, return arg > param;)
-FILTER_GENERATOR_PARAM(IsGreaterEq, return arg >= param;)
+PKO_PREDICATE_FILTER_GENERATOR_PARAM(IsDivisibleBy, return helper::IsDivisibleByHelper(std::move(arg), std::move(param));)
+PKO_PREDICATE_FILTER_GENERATOR_PARAM(IsLesserThan, return arg < param;)
+PKO_PREDICATE_FILTER_GENERATOR_PARAM(IsLesserEq, return arg <= param;)
+PKO_PREDICATE_FILTER_GENERATOR_PARAM(IsGreaterThan, return arg > param;)
+PKO_PREDICATE_FILTER_GENERATOR_PARAM(IsGreaterEq, return arg >= param;)
 
-#undef FILTER_GENERATOR_PARAM
+#undef PKO_PREDICATE_FILTER_GENERATOR_PARAM
 
-#define FILTER_GENERATOR_2PARAM(name, filter)                                                            \
+#define PKO_PREDICATE_FILTER_GENERATOR_2PARAM(name, filter)                                              \
 namespace impl {                                                                                         \
                                                                                                          \
 template <typename T>                                                                                    \
@@ -763,11 +763,11 @@ const void* name(T&& p1, T&& p2) noexcept                                       
   return impl::name ## Impl<T>::checker(std::move(p1), std::move(p2));                                   \
 }
 
-FILTER_GENERATOR_2PARAM(InBetween, return arg >= param1 && arg <= param2;)
-FILTER_GENERATOR_2PARAM(Outside, return arg < param1 || arg > param2;)
-FILTER_GENERATOR_2PARAM(IsEqualEpsilon, return (arg >= param1) ? (arg - param1) <= param2 : (param1 - arg) <= param2;)
+PKO_PREDICATE_FILTER_GENERATOR_2PARAM(InBetween, return arg >= param1 && arg <= param2;)
+PKO_PREDICATE_FILTER_GENERATOR_2PARAM(Outside, return arg < param1 || arg > param2;)
+PKO_PREDICATE_FILTER_GENERATOR_2PARAM(IsEqualEpsilon, return (arg >= param1) ? (arg - param1) <= param2 : (param1 - arg) <= param2;)
 
-#undef FILTER_GENERATOR_2PARAM
+#undef PKO_PREDICATE_FILTER_GENERATOR_2PARAM
 
 }; /* namespace Predicate */
 
