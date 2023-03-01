@@ -160,6 +160,14 @@ int main(void) noexcept
   evalhelper(PredicateExecHelper(Resist(IsOdd<int>()), Encapsulate(13)) == 0);
   evalhelper(PredicateExecHelper(Resist(IsOdd<int>()), Encapsulate(42)) == 1);
 
+  // works with lambda
+  evalhelper(PredicateExecHelper(Obey([](const Encapsulator&){ return true; }), Encapsulate(13)) == 1);
+  evalhelper(PredicateExecHelper(Obey([](const Encapsulator&){ return false; }), Encapsulate(13)) == 0);
+
+  // hell yeah, no way to get back the type...
+  evalhelper(PredicateExecHelper(Obey([](const Encapsulator& e){ return Decapsulate<int>(e) == 42; }), Encapsulate(42)) == 1);
+  evalhelper(PredicateExecHelper(Obey([](const Encapsulator& e){ return Decapsulate<int>(e) == 42; }), Encapsulate(13)) == 0);
+
   ForgetPredicates();
 
   return 0;

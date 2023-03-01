@@ -115,6 +115,12 @@ auto Encapsulate(T&& what) noexcept ->
   return impl::EncapsulatorImpl<T>(std::move(what));
 }
 
+template <typename T>
+inline const T& Decapsulate(const Encapsulator& what) noexcept
+{
+  return *(reinterpret_cast<const T*>(what.fetch()));
+}
+
 inline void ForgetPredicates() noexcept
 {
   impl::holder.clear();
@@ -423,7 +429,7 @@ public:
 
   bool execute(const Encapsulator& what) const noexcept override
   {
-    T val = *(reinterpret_cast<const T*>(what.fetch()));
+    auto val = Decapsulate<T>(what);
     auto result = val == _arg;
     if (!result) {
       handicap::ostringstream msg;
@@ -485,7 +491,7 @@ public:                                                                         
                                                                                                 \
   bool execute(const Encapsulator& what) const noexcept override                                \
   {                                                                                             \
-    T val = *(reinterpret_cast<const T*>(what.fetch()));                                        \
+    auto val = Decapsulate<T>(what);                                                            \
     auto result = [](T arg) noexcept {filter}(val);                                             \
     if (!result) {                                                                              \
       handicap::ostringstream msg;                                                              \
@@ -626,7 +632,7 @@ public:                                                                         
                                                                                                 \
   bool execute(const Encapsulator& what) const noexcept override                                \
   {                                                                                             \
-    T val = *(reinterpret_cast<const T*>(what.fetch()));                                        \
+    auto val = Decapsulate<T>(what);                                                            \
     auto result = [](T arg, T param) noexcept {filter}(val, _param);                            \
     if (!result) {                                                                              \
       handicap::ostringstream msg;                                                              \
@@ -730,7 +736,7 @@ public:                                                                         
                                                                                                          \
   bool execute(const Encapsulator& what) const noexcept override                                         \
   {                                                                                                      \
-    T val = *(reinterpret_cast<const T*>(what.fetch()));                                                 \
+    auto val = Decapsulate<T>(what);                                                                     \
     auto result = [](T arg, T param1, T param2) noexcept {filter}(val, _p1, _p2);                        \
     if (!result) {                                                                                       \
       handicap::ostringstream msg;                                                                       \
