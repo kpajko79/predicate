@@ -4,6 +4,10 @@ CXX := g++
 CXXLD := g++
 
 RM := rm -f
+RMDIR := rm -rf
+MKDIR := mkdir -p
+
+BUILD_DIR := build
 
 CPPFLAGS := -I. -MMD
 
@@ -81,44 +85,48 @@ CXXFLAGS += -std=c++11
 
 LDFLAGS :=
 
-all: test_predicate address_sanitizer undefined_sanitizer analyzer
+all: $(BUILD_DIR)/test_predicate
 
-address_sanitizer: test_predicate_asan
+test: address_sanitizer undefined_sanitizer analyzer
+
+address_sanitizer: $(BUILD_DIR)/test_predicate_asan
 	$(addprefix ./,$<)
 
-undefined_sanitizer: test_predicate_ubsan
+undefined_sanitizer: $(BUILD_DIR)/test_predicate_ubsan
 	$(addprefix ./,$<)
 
-analyzer: test_predicate_analyzer
+analyzer: $(BUILD_DIR)/test_predicate_analyzer
 	$(addprefix ./,$<)
 
-test_predicate_asan: LDFLAGS += $(ASAN_FLAGS)
-test_predicate_asan: test_predicate_asan.o
+$(BUILD_DIR)/%: $(BUILD_DIR)/%.o
 	$(CXXLD) $(LDFLAGS) -o $@ $^
 
-test_predicate_ubsan: LDFLAGS += $(UBSAN_FLAGS)
-test_predicate_ubsan: test_predicate_ubsan.o
-	$(CXXLD) $(LDFLAGS) -o $@ $^
+$(BUILD_DIR)/test_predicate_asan: LDFLAGS += $(ASAN_FLAGS)
+$(BUILD_DIR)/test_predicate_ubsan: LDFLAGS += $(UBSAN_FLAGS)
+$(BUILD_DIR)/test_predicate_analyzer: LDFLAGS += $(ANALYZER_FLAGS)
 
-test_predicate_analyzer: LDFLAGS += $(ANALYZER_FLAGS)
-test_predicate_analyzer: test_predicate_analyzer.o
-	$(CXXLD) $(LDFLAGS) -o $@ $^
+$(BUILD_DIR)/%_asan.o: CXXFLAGS += $(ASAN_FLAGS)
+$(BUILD_DIR)/%_ubsan.o: CXXFLAGS += $(UBSAN_FLAGS)
+$(BUILD_DIR)/%_analyzer.o: CXXFLAGS += $(ANALYZER_FLAGS)
 
-%_asan.o: CXXFLAGS += $(ASAN_FLAGS)
-%_asan.o: %.cpp
+$(BUILD_DIR)/%_asan.o: %.cpp | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-%_ubsan.o: CXXFLAGS += $(UBSAN_FLAGS)
-%_ubsan.o: %.cpp
+$(BUILD_DIR)/%_ubsan.o: %.cpp | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-%_analyzer.o: CXXFLAGS += $(ANALYZER_FLAGS)
-%_analyzer.o: %.cpp
+$(BUILD_DIR)/%_analyzer.o: %.cpp | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	$(RM) test_predicate test_predicate_asan test_predicate_ubsan test_predicate_analyzer *.o *.d
+	$(RMDIR) $(BUILD_DIR)
 
-%.d:
+$(BUILD_DIR):
+	$(MKDIR) $@
 
--include *.d
+.PHONY: clean
+
+-include $(BUILD_DIR)/*.d

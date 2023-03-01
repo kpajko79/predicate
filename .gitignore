@@ -1,6 +1,1 @@
-test_predicate
-test_predicate_asan
-test_predicate_ubsan
-test_predicate_analyzer
-*.o
-*.d
+build
