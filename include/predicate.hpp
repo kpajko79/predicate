@@ -35,9 +35,20 @@
 #include "integer_sequence.hpp"
 #include "handicap_ostringstream.hpp"
 
+#if defined(PKO_PREDICATE_ENABLE_BACKTRACE)
+#include "unwind_tool.hpp"
+#endif
+
 namespace pajko {
 
 namespace Predicate {
+
+#if !defined(PKO_PREDICATE_ENABLE_BACKTRACE)
+#define PKO_PREDICATE_UNWIND_HOOK(msg)
+#else
+#define PKO_PREDICATE_UNWIND_HOOK(msg)                                  \
+  msg << ::pajko::tools::Unwinder::go()
+#endif
 
 #if !defined(PKO_PREDICATE_LOGGER_HELPER)
 #define PKO_PREDICATE_LOGGER(result, text)                              \
@@ -47,8 +58,10 @@ namespace Predicate {
 [&]() noexcept {                                                        \
   auto _result = (result);                                              \
   if (!_result) {                                                       \
-    const auto& msg = (handicap::ostringstream{} << text).str();        \
-    PKO_PREDICATE_LOGGER_HELPER(_result, msg.c_str());                  \
+    handicap::ostringstream msg;                                        \
+    msg << text;                                                        \
+    PKO_PREDICATE_UNWIND_HOOK(msg);                                     \
+    PKO_PREDICATE_LOGGER_HELPER(_result, msg.str().c_str());            \
   }                                                                     \
   return _result;                                                       \
 }()
@@ -780,3 +793,4 @@ bool PredicateExecHelper(const void* expected, const void* actual) noexcept
 }; /* namespace pajko */
 
 // leave PKO_PREDICATE_LOGGER macro available for external use
+// PKO_PREDICATE_UNWIND_HOOK is required as well

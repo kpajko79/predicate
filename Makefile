@@ -9,7 +9,12 @@ MKDIR := mkdir -p
 
 BUILD_DIR := build
 
-CPPFLAGS := -I. -Iinclude -MMD
+CPPFLAGS := \
+	-I. \
+	-Iinclude \
+	-I/usr/include/libunwind \
+	-DPKO_PREDICATE_ENABLE_BACKTRACE \
+	-MMD
 
 COMMON_FLAGS := -Og -ggdb3 -ftrapv -pedantic \
 	-Wall \
@@ -78,12 +83,29 @@ ANALYZER_FLAGS := \
 # gcc only
 #	-fsanitize=bounds-strict \
 
-CFLAGS := -O2
+CFLAGS := \
+	-std=c11 \
+	-Og \
+	-ggdb3 \
+	-fexceptions \
+	-funwind-tables \
+	-fasynchronous-unwind-tables \
+	-fno-dwarf2-cfi-asm \
+	-fvar-tracking-assignments
 
-CXXFLAGS := -O2
-CXXFLAGS += -std=c++11
+CXXFLAGS := \
+	-std=c++11 \
+	-Og \
+	-ggdb3 \
+	-fexceptions \
+	-funwind-tables \
+	-fasynchronous-unwind-tables \
+	-fno-dwarf2-cfi-asm \
+	-fvar-tracking-assignments
 
-LDFLAGS :=
+LDFLAGS := -rdynamic
+
+LDLIBS := -lunwind
 
 all: $(BUILD_DIR)/test_predicate
 
@@ -99,7 +121,7 @@ analyzer: $(BUILD_DIR)/test_predicate_analyzer
 	$(addprefix ./,$<)
 
 $(BUILD_DIR)/%: $(BUILD_DIR)/%.o
-	$(CXXLD) $(LDFLAGS) -o $@ $^
+	$(CXXLD) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(BUILD_DIR)/test_predicate_asan: LDFLAGS += $(ASAN_FLAGS)
 $(BUILD_DIR)/test_predicate_ubsan: LDFLAGS += $(UBSAN_FLAGS)
