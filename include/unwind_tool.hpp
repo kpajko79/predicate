@@ -40,10 +40,23 @@ namespace tools {
 
 class Unwinder {
 public:
-  Unwinder() = delete;
-  ~Unwinder() = delete;
+  ~Unwinder() noexcept = default;
 
-  static std::string resolve(unw_word_t ip, unw_word_t sp) noexcept
+  static const Unwinder& get() noexcept
+  {
+    static const Unwinder instance;
+    return instance;
+  }
+
+  static std::string go() noexcept
+  {
+    return get().unwind();
+  }
+
+private:
+  Unwinder() noexcept = default;
+
+  std::string resolve(unw_word_t ip, unw_word_t sp) const noexcept
   {
     std::ostringstream result;
     Dl_info info;
@@ -96,7 +109,7 @@ public:
     return result.str();
   }
 
-  static std::string go() noexcept
+  std::string unwind() const noexcept
   {
     std::ostringstream result;
     unw_context_t uc;
