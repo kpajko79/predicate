@@ -60,8 +60,9 @@ private:
   {
     std::ostringstream result;
     Dl_info info;
+    int status;
 
-    int status = dladdr(reinterpret_cast<const void*>(ip), &info);
+    status = dladdr(reinterpret_cast<const void*>(ip), &info);
     if (status && info.dli_fname != NULL && info.dli_fname[0] != '\0') {
       if (info.dli_fname) result << info.dli_fname;
       result << "(";
@@ -84,7 +85,6 @@ private:
         }
 
         if (info.dli_sname) {
-          int status;
           auto sym = info.dli_sname;
           size_t size = 128;
 

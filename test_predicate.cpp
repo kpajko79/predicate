@@ -80,8 +80,16 @@ int main(void) noexcept
 
   // WARNING: make sure that the type matches (the default is int)
   evalhelper(PredicateExecHelper(IsEqual({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), Encapsulate(bufexpected2)) == 1);
+
+  // yeah, I know, but this is just a test...
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wc99-extension"
   evalhelper(PredicateExecHelper(IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), Encapsulate(bufactual)) == 0);
   evalhelper(PredicateExecHelper(IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 10}), Encapsulate(bufactual)) == 1);
+#pragma GCC diagnostic pop
 
   evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(42)) == 1);
   evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(24)) == 0);

@@ -16,7 +16,16 @@ CPPFLAGS := \
 	-DPKO_PREDICATE_ENABLE_BACKTRACE \
 	-MMD
 
-COMMON_FLAGS := -Og -ggdb3 -ftrapv -pedantic \
+COMMON_FLAGS := \
+	-Og \
+	-ggdb3 \
+	-fexceptions \
+	-funwind-tables \
+	-fasynchronous-unwind-tables \
+	-fno-dwarf2-cfi-asm \
+	-fvar-tracking-assignments \
+	-ftrapv \
+	-pedantic \
 	-Wall \
 	-Wextra \
 	-Wdouble-promotion \
@@ -43,18 +52,15 @@ COMMON_FLAGS := -Og -ggdb3 -ftrapv -pedantic \
 	-Warith-conversion \
 	-Wlogical-op \
 	-Warray-parameter \
-	-Wno-float-equal \
-	-Wno-c99-extension
+	-Wno-float-equal
 
 ASAN_FLAGS := \
-	$(COMMON_FLAGS) \
 	-fsanitize=address \
 	-fsanitize=pointer-compare \
 	-fsanitize=pointer-subtract \
 	-fsanitize=leak
 
 UBSAN_FLAGS := \
-	$(COMMON_FLAGS) \
 	-fsanitize=undefined \
 	-fsanitize=shift \
 	-fsanitize=shift-exponent \
@@ -76,7 +82,6 @@ UBSAN_FLAGS := \
 	-fsanitize=pointer-overflow
 
 ANALYZER_FLAGS := \
-	$(COMMON_FLAGS) \
 	-fanalyzer \
 	-Wanalyzer-too-complex
 
@@ -85,23 +90,11 @@ ANALYZER_FLAGS := \
 
 CFLAGS := \
 	-std=c11 \
-	-Og \
-	-ggdb3 \
-	-fexceptions \
-	-funwind-tables \
-	-fasynchronous-unwind-tables \
-	-fno-dwarf2-cfi-asm \
-	-fvar-tracking-assignments
+	$(COMMON_FLAGS)
 
 CXXFLAGS := \
 	-std=c++11 \
-	-Og \
-	-ggdb3 \
-	-fexceptions \
-	-funwind-tables \
-	-fasynchronous-unwind-tables \
-	-fno-dwarf2-cfi-asm \
-	-fvar-tracking-assignments
+	$(COMMON_FLAGS)
 
 LDFLAGS := -rdynamic
 
