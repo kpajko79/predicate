@@ -782,13 +782,13 @@ PKO_PREDICATE_FILTER_GENERATOR_2PARAM(IsEqualEpsilon, return (arg >= param1) ? (
 
 #undef PKO_PREDICATE_FILTER_GENERATOR_2PARAM
 
-}; /* namespace Predicate */
-
 bool PredicateExecHelper(const void* expected, const void* actual) noexcept
 {
-  auto predicate = reinterpret_cast<const Predicate::Predicate*>(expected);
-  return predicate->execute(*reinterpret_cast<const Predicate::Encapsulator*>(actual));
+  auto predicate = reinterpret_cast<const Predicate*>(expected);
+  return predicate->execute(*reinterpret_cast<const Encapsulator*>(actual));
 }
+
+}; /* namespace Predicate */
 
 }; /* namespace pajko */
 
