@@ -34,6 +34,7 @@
 
 #include "integer_sequence.hpp"
 #include "handicap_ostringstream.hpp"
+#include "compiler_support.hpp"
 
 #if defined(PKO_PREDICATE_ENABLE_BACKTRACE)
 #include "unwind_tool.hpp"
@@ -348,7 +349,7 @@ namespace impl {
 
 namespace helper {
 
-inline bool MatcherHelperAll(std::vector<bool>&& results) noexcept
+PKO_PURE inline bool MatcherHelperAll(std::vector<bool>&& results) noexcept
 {
   bool result = true;
 
@@ -359,7 +360,7 @@ inline bool MatcherHelperAll(std::vector<bool>&& results) noexcept
   return result;
 }
 
-inline bool MatcherHelperNone(std::vector<bool>&& results) noexcept
+PKO_PURE inline bool MatcherHelperNone(std::vector<bool>&& results) noexcept
 {
   bool result = false;
 
@@ -370,7 +371,7 @@ inline bool MatcherHelperNone(std::vector<bool>&& results) noexcept
   return !result;
 }
 
-inline bool MatcherHelperAny(std::vector<bool>&& results) noexcept
+PKO_PURE inline bool MatcherHelperAny(std::vector<bool>&& results) noexcept
 {
   for (auto r : results) {
     if (r) {
@@ -381,7 +382,7 @@ inline bool MatcherHelperAny(std::vector<bool>&& results) noexcept
   return false;
 }
 
-inline bool MatcherHelperOne(std::vector<bool>&& results) noexcept
+PKO_PURE inline bool MatcherHelperOne(std::vector<bool>&& results) noexcept
 {
   bool result = false;
 
