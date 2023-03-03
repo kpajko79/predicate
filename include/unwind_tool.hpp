@@ -63,11 +63,11 @@ private:
     int status;
 
     status = dladdr(reinterpret_cast<const void*>(ip), &info);
-    if (status && info.dli_fname != NULL && info.dli_fname[0] != '\0') {
+    if (status && info.dli_fname && info.dli_fname[0] != '\0') {
       if (info.dli_fname) result << info.dli_fname;
       result << "(";
 
-      if (info.dli_sname == NULL) {
+      if (!info.dli_sname) {
         info.dli_saddr = info.dli_fbase;
       }
 
