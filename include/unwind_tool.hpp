@@ -78,10 +78,10 @@ private:
         auto saddr = reinterpret_cast<unw_word_t>(info.dli_saddr);
         if (ip >= saddr) {
           sign = '+';
-          offset = ip - saddr;
+          offset = static_cast<ptrdiff_t>(ip - saddr);
         } else {
           sign = '-';
-          offset = saddr - ip;
+          offset = static_cast<ptrdiff_t>(saddr - ip);
         }
 
         if (info.dli_sname) {
