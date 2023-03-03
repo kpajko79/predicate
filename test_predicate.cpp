@@ -34,6 +34,9 @@
 
 #include <predicate.hpp>
 
+#include <array>
+#include <vector>
+
 using namespace pajko;
 using namespace pajko::Predicate;
 
@@ -90,6 +93,9 @@ int main(void) noexcept
   evalhelper(PredicateExecHelper(IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), Encapsulate(bufactual)) == 0);
   evalhelper(PredicateExecHelper(IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 10}), Encapsulate(bufactual)) == 1);
 #pragma GCC diagnostic pop
+
+  evalhelper(PredicateExecHelper(IsEqual(std::array<uint8_t, 10>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }), Encapsulate(bufactual)) == 1);
+  evalhelper(PredicateExecHelper(IsEqual(std::vector<uint8_t>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }), Encapsulate(bufactual)) == 1);
 
   evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(42)) == 1);
   evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(24)) == 0);

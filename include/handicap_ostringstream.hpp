@@ -26,6 +26,8 @@
 
 #include <sstream>
 #include <type_traits>
+#include <array>
+#include <vector>
 
 namespace pajko {
 
@@ -155,9 +157,10 @@ public:
     return *this;
   }
 
-  template <typename T>
-  auto operator<<(T&& c) noexcept ->
+  template <typename T, size_t N = 0>
+  auto operator<<(const T& c) noexcept ->
   typename std::enable_if<
+    N == 0 &&
     !std::is_same<typename std::decay<T>::type, char>::value &&
     !std::is_same<typename std::decay<T>::type, unsigned char>::value &&
     !std::is_same<typename std::decay<T>::type, wchar_t>::value &&
@@ -170,7 +173,54 @@ public:
     return *this;
   }
 
+  template <typename T, size_t N>
+  handicap_ostringstream& operator<<(const std::array<T, N>& a) noexcept
+  {
+    return printArray(a.data(), N);
+  }
+
+  template <typename T>
+  handicap_ostringstream& operator<<(const std::vector<T>& v) noexcept
+  {
+    return printArray(v.data(), v.size());
+  }
+
+  template <typename T, size_t N>
+  handicap_ostringstream& operator<<(T (&&a)[N]) noexcept
+  {
+    return printArray(&a[0], N);
+  }
+
+  template <typename T, size_t N>
+  handicap_ostringstream& operator<<(const T (&a)[N]) noexcept
+  {
+    return printArray(&a[0], N);
+    return *this;
+  }
+
 private:
+  template <typename T>
+  handicap_ostringstream& printArray(const T* a, size_t n) noexcept
+  {
+    size_t i, m = n;
+
+#if defined(PKO_STREAM_ARRAY_LIMIT)
+    if (m > PKO_STREAM_ARRAY_LIMIT) m = PKO_STREAM_ARRAY_LIMIT;
+#endif
+
+    stream << "< ";
+    operator<<(n);
+    stream << " |";
+    for (i = 0; i < m; i++) {
+      stream << " ";
+      operator<<(a[i]);
+    }
+    if (n > m) stream << "...";
+    stream << " >";
+
+    return *this;
+  }
+
   super stream;
 };
 
