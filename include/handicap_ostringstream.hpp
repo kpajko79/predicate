@@ -186,13 +186,21 @@ public:
   }
 
   template <typename T, size_t N>
-  handicap_ostringstream& operator<<(T (&&a)[N]) noexcept
+  auto operator<<(T (&&a)[N]) noexcept ->
+  typename std::enable_if<
+    !std::is_same<typename std::decay<T>::type, char>::value,
+    handicap_ostringstream&
+  >::type
   {
     return printArray(&a[0], N);
   }
 
   template <typename T, size_t N>
-  handicap_ostringstream& operator<<(const T (&a)[N]) noexcept
+  auto operator<<(const T (&a)[N]) noexcept ->
+  typename std::enable_if<
+    !std::is_same<typename std::decay<T>::type, char>::value,
+    handicap_ostringstream&
+  >::type
   {
     return printArray(&a[0], N);
     return *this;
