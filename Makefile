@@ -100,7 +100,7 @@ LDFLAGS := -rdynamic
 
 LDLIBS := -lunwind
 
-all: $(BUILD_DIR)/test_predicate
+all: $(BUILD_DIR)/test_predicate $(BUILD_DIR)/test_predicate_dbghook
 
 test: address_sanitizer undefined_sanitizer analyzer
 
@@ -123,6 +123,7 @@ $(BUILD_DIR)/test_predicate_analyzer: LDFLAGS += $(ANALYZER_FLAGS)
 $(BUILD_DIR)/%_asan.o: CXXFLAGS += $(ASAN_FLAGS)
 $(BUILD_DIR)/%_ubsan.o: CXXFLAGS += $(UBSAN_FLAGS)
 $(BUILD_DIR)/%_analyzer.o: CXXFLAGS += $(ANALYZER_FLAGS)
+$(BUILD_DIR)/%_dbghook.o: CXXFLAGS += -DPKO_PREDICATE_DO_DEBUGBREAK
 
 $(BUILD_DIR)/%_asan.o: %.cpp | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
@@ -131,6 +132,9 @@ $(BUILD_DIR)/%_ubsan.o: %.cpp | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/%_analyzer.o: %.cpp | $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/%_dbghook.o: %.cpp | $(BUILD_DIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)

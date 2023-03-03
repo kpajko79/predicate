@@ -25,7 +25,9 @@
 #pragma once
 
 #include <memory>
+#include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <type_traits>
@@ -36,7 +38,7 @@
 #include "handicap_ostringstream.hpp"
 #include "compiler_support.hpp"
 
-#if defined(PKO_PREDICATE_ENABLE_BACKTRACE)
+#if defined(PKO_PREDICATE_ENABLE_BACKTRACE) && !defined(PKO_PREDICATE_DEBUGBREAK)
 #include "unwind_tool.hpp"
 #endif
 
@@ -44,7 +46,18 @@ namespace pajko {
 
 namespace Predicate {
 
-#if !defined(PKO_PREDICATE_ENABLE_BACKTRACE)
+#if defined(NDEBUG)
+#define PKO_PREDICATE_DEBUGBREAK                                        \
+  std::abort()
+#else
+#define PKO_PREDICATE_DEBUGBREAK                                        \
+  assert(false)
+#endif
+
+#if defined(PKO_PREDICATE_DO_DEBUGBREAK)
+#define PKO_PREDICATE_UNWIND_HOOK(msg)                                  \
+  PKO_PREDICATE_DEBUGBREAK
+#elif !defined(PKO_PREDICATE_ENABLE_BACKTRACE)
 #define PKO_PREDICATE_UNWIND_HOOK(msg)
 #else
 #define PKO_PREDICATE_UNWIND_HOOK(msg)                                  \
