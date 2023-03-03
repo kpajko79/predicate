@@ -43,28 +43,28 @@ using namespace pajko::Predicate;
 template <typename T>
 bool testfunc(const Encapsulator& arg)
 {
-  auto& val = *(reinterpret_cast<const T*>(arg.fetch()));
+  auto& val = Decapsulate<T>(arg);
   return PKO_PREDICATE_LOGGER(val == 42, val << " is not fourtytwo");
 }
 
 template <typename T>
 bool iseven(const Encapsulator& arg)
 {
-  auto& val = *(reinterpret_cast<const T*>(arg.fetch()));
+  auto& val = Decapsulate<T>(arg);
   return PKO_PREDICATE_LOGGER((val % 2) == 0, val << " is not even");
 }
 
 template <typename T>
 bool isgt10(const Encapsulator& arg)
 {
-  auto& val = *(reinterpret_cast<const T*>(arg.fetch()));
+  auto& val = Decapsulate<T>(arg);
   return PKO_PREDICATE_LOGGER(val > 10, val << " is not greater than ten");
 }
 
 template <typename T>
 bool isbetween(const Encapsulator& arg, T low, T high)
 {
-  auto& val = *(reinterpret_cast<const T*>(arg.fetch()));
+  auto& val = Decapsulate<T>(arg);
   return PKO_PREDICATE_LOGGER(val >= low && val <= high, val << " is not between " << low << " and " << high);
 }
 
