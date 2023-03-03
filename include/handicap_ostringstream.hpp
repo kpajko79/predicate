@@ -38,6 +38,7 @@ class handicap_ostringstream
 {
 private:
   using super = std::basic_ostringstream<CharT, Traits, Allocator>;
+  using stream_type = std::basic_ostream<CharT, Traits>;
 
 public:
   handicap_ostringstream() noexcept
@@ -203,6 +204,12 @@ public:
   >::type
   {
     return printArray(&a[0], N);
+    return *this;
+  }
+
+  handicap_ostringstream& operator<<(stream_type& (*manip)(stream_type&))
+  {
+    stream << manip;
     return *this;
   }
 
