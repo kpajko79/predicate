@@ -36,6 +36,7 @@
 
 #include <array>
 #include <vector>
+#include <tuple>
 
 using namespace pajko;
 using namespace pajko::Predicate;
@@ -66,6 +67,18 @@ bool isbetween(const Encapsulator& arg, T low, T high)
 {
   auto& val = Decapsulate<T>(arg);
   return PKO_PREDICATE_LOGGER(val >= low && val <= high, val << " is not between " << low << " and " << high);
+}
+
+template <typename T>
+using twople_t = std::tuple<T, T>;
+
+template <typename T>
+bool sumis15(const Encapsulator &arg)
+{
+  auto& val = Decapsulate<twople_t<T>>(arg);
+  auto a = std::get<0>(val);
+  auto b = std::get<1>(val);
+  return PKO_PREDICATE_LOGGER((a + b) == 15, "the sum of " << a << " and " << b << " is not 15");
 }
 
 #define evalhelper(p) \
@@ -191,6 +204,11 @@ int main(void) noexcept
   // hell yeah, no way to get back the type...
   evalhelper(PredicateExecHelper(Obey([](const Encapsulator& e){ return Decapsulate<int>(e) == 42; }), Encapsulate(42)) == 1);
   evalhelper(PredicateExecHelper(Obey([](const Encapsulator& e){ return Decapsulate<int>(e) == 42; }), Encapsulate(13)) == 0);
+
+  evalhelper(PredicateExecHelper(Obey(sumis15<int>), Encapsulate(twople_t<int>{ 7, 8 })) == 1);
+  evalhelper(PredicateExecHelper(Obey(sumis15<int>), Encapsulate(twople_t<int>{ 8, 7 })) == 1);
+  evalhelper(PredicateExecHelper(Obey(sumis15<int>), Encapsulate(twople_t<int>{ 8, 8 })) == 0);
+  evalhelper(PredicateExecHelper(Obey(sumis15<int>), Encapsulate(twople_t<int>{ 7, 7 })) == 0);
 
   ForgetPredicates();
 
