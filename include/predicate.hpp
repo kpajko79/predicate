@@ -103,8 +103,8 @@ public:
   EncapsulatorImpl() noexcept = delete;
   ~EncapsulatorImpl() noexcept = default;
 
-  EncapsulatorImpl(T&& what) noexcept
-    : _what(std::move(what))
+  EncapsulatorImpl(const T& what) noexcept
+    : _what(what)
     {}
 
   const void* fetch() const noexcept override
@@ -134,7 +134,7 @@ auto Encapsulate(T (&&arg)[N]) noexcept -> const void*
 
 template <typename T>
 inline
-auto Encapsulate(T&& what) noexcept ->
+auto Encapsulate(const T& what) noexcept ->
   typename std::enable_if<
     !std::is_pointer<typename std::decay<T>::type>::value,
     impl::EncapsulatorImpl<T>

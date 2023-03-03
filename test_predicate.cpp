@@ -78,6 +78,9 @@ int main(void) noexcept
 
   int bufexpected2[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
+  std::array<uint8_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 };
+  std::vector<uint8_t> vec{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 };
+
   evalhelper(PredicateExecHelper(IsEqual(bufexpected), Encapsulate(bufactual)) == 0);
   evalhelper(PredicateExecHelper(IsEqual(bufactual), Encapsulate(bufactual)) == 1);
 
@@ -94,8 +97,8 @@ int main(void) noexcept
   evalhelper(PredicateExecHelper(IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 10}), Encapsulate(bufactual)) == 1);
 #pragma GCC diagnostic pop
 
-  evalhelper(PredicateExecHelper(IsEqual(std::array<uint8_t, 10>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }), Encapsulate(bufactual)) == 1);
-  evalhelper(PredicateExecHelper(IsEqual(std::vector<uint8_t>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }), Encapsulate(bufactual)) == 1);
+  evalhelper(PredicateExecHelper(IsEqual(std::array<uint8_t, 10>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }), Encapsulate(arr)) == 1);
+  evalhelper(PredicateExecHelper(IsEqual(std::vector<uint8_t>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }), Encapsulate(vec)) == 1);
 
   evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(42)) == 1);
   evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(24)) == 0);
