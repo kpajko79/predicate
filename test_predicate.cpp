@@ -117,8 +117,8 @@ bool sumis15(const Encapsulator &arg)
 int main(void) noexcept
 {
   // test type matching (the first one should pass if the types would match)
-  evalhelper(PredicateExecHelper(Obey(testfunc<int>), Encapsulate<uint8_t>(42)) == 0);
-  evalhelper(PredicateExecHelper(Obey(testfunc<int>), Encapsulate<uint8_t>(41)) == 0);
+  { auto pred = Obey(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(42)) == 0); }
+  { auto pred = Obey(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(41)) == 0); }
 
   uint8_t bufexpected[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
   uint8_t bufactual[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 };
@@ -128,13 +128,13 @@ int main(void) noexcept
   std::array<uint8_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 };
   std::vector<uint8_t> vec{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 };
 
-  evalhelper(PredicateExecHelper(IsEqual(bufexpected), Encapsulate(bufactual)) == 0);
-  evalhelper(PredicateExecHelper(IsEqual(bufactual), Encapsulate(bufactual)) == 1);
+  { auto pred = IsEqual(bufexpected); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 0); }
+  { auto pred = IsEqual(bufactual); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 1); }
 
   // WARNING: make sure that the type matches (the default is int)
-  evalhelper(PredicateExecHelper(IsEqual({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), Encapsulate(bufexpected2)) == 1);
-  evalhelper(PredicateExecHelper(IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), Encapsulate({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 })) == 1);
-  evalhelper(PredicateExecHelper(IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), Encapsulate({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 })) == 0);
+  { auto pred = IsEqual({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}); evalhelper(PredicateExecHelper(pred, Encapsulate(bufexpected2)) == 1); }
+  { auto pred = IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }); evalhelper(PredicateExecHelper(pred, Encapsulate({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 })) == 1); }
+  { auto pred = IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }); evalhelper(PredicateExecHelper(pred, Encapsulate({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 })) == 0); }
 
   // yeah, I know, but this is just a test...
 #pragma GCC diagnostic push
@@ -142,60 +142,60 @@ int main(void) noexcept
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wc99-extension"
-  evalhelper(PredicateExecHelper(IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), Encapsulate(bufactual)) == 0);
-  evalhelper(PredicateExecHelper(IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 10}), Encapsulate(bufactual)) == 1);
+  { auto pred = IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 9}); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 0); }
+  { auto pred = IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 10}); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 1); }
 #pragma GCC diagnostic pop
 
-  evalhelper(PredicateExecHelper(IsEqual(std::array<uint8_t, 10>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }), Encapsulate(arr)) == 1);
-  evalhelper(PredicateExecHelper(IsEqual(std::vector<uint8_t>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }), Encapsulate(vec)) == 1);
+  { auto pred = IsEqual(std::array<uint8_t, 10>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }); evalhelper(PredicateExecHelper(pred, Encapsulate(arr)) == 1); }
+  { auto pred = IsEqual(std::vector<uint8_t>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }); evalhelper(PredicateExecHelper(pred, Encapsulate(vec)) == 1); }
 
-  evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(42)) == 1);
-  evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(24)) == 0);
+  { auto pred = IsEqual(42); evalhelper(PredicateExecHelper(pred, Encapsulate(42)) == 1); }
+  { auto pred = IsEqual(42); evalhelper(PredicateExecHelper(pred, Encapsulate(24)) == 0); }
 
-  evalhelper(PredicateExecHelper(IsOdd<uint8_t>(), Encapsulate<uint8_t>(42)) == 0);
-  evalhelper(PredicateExecHelper(IsEven<uint8_t>(), Encapsulate<uint8_t>(21)) == 0);
-  evalhelper(PredicateExecHelper(IsDivisibleBy<uint8_t>(7), Encapsulate<uint8_t>(42)) == 1);
-  evalhelper(PredicateExecHelper(IsDivisibleBy<uint8_t>(7), Encapsulate<uint8_t>(43)) == 0);
-  evalhelper(PredicateExecHelper(InBetween<uint8_t>(10, 20), Encapsulate<uint8_t>(15)) == 1);
-  evalhelper(PredicateExecHelper(InBetween<uint8_t>(10, 20), Encapsulate<uint8_t>(42)) == 0);
-  evalhelper(PredicateExecHelper(Outside<uint8_t>(10, 20), Encapsulate<uint8_t>(42)) == 1);
-  evalhelper(PredicateExecHelper(Outside<uint8_t>(10, 20), Encapsulate<uint8_t>(15)) == 0);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(12)) == 0);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(13)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(14)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(15)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(16)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(17)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(18)) == 0);
+  { auto pred = IsOdd<uint8_t>(); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(42)) == 0); }
+  { auto pred = IsEven<uint8_t>(); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(21)) == 0); }
+  { auto pred = IsDivisibleBy<uint8_t>(7); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(42)) == 1); }
+  { auto pred = IsDivisibleBy<uint8_t>(7); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(43)) == 0); }
+  { auto pred = InBetween<uint8_t>(10, 20); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(15)) == 1); }
+  { auto pred = InBetween<uint8_t>(10, 20); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(42)) == 0); }
+  { auto pred = Outside<uint8_t>(10, 20); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(42)) == 1); }
+  { auto pred = Outside<uint8_t>(10, 20); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(15)) == 0); }
+  { auto pred = IsEqualEpsilon<uint8_t>(15, 2); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(12)) == 0); }
+  { auto pred = IsEqualEpsilon<uint8_t>(15, 2); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(13)) == 1); }
+  { auto pred = IsEqualEpsilon<uint8_t>(15, 2); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(14)) == 1); }
+  { auto pred = IsEqualEpsilon<uint8_t>(15, 2); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(15)) == 1); }
+  { auto pred = IsEqualEpsilon<uint8_t>(15, 2); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(16)) == 1); }
+  { auto pred = IsEqualEpsilon<uint8_t>(15, 2); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(17)) == 1); }
+  { auto pred = IsEqualEpsilon<uint8_t>(15, 2); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(18)) == 0); }
 
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<double>(0.2, 0.001), Encapsulate(0.3)) == 0);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<double>(0.2, 0.1), Encapsulate(0.3)) == 1);
-  evalhelper(PredicateExecHelper(IsLesserEq<double>(42.5), Encapsulate(102.3)) == 0);
-  evalhelper(PredicateExecHelper(IsLesserEq<double>(42.5), Encapsulate(12.3)) == 1);
-  evalhelper(PredicateExecHelper(IsOdd<double>(), Encapsulate(102.3)) == 0);
-  evalhelper(PredicateExecHelper(IsEven<double>(), Encapsulate(102.3)) == 0);
-  evalhelper(PredicateExecHelper(IsOdd<double>(), Encapsulate(102.0)) == 0);
-  evalhelper(PredicateExecHelper(IsEven<double>(), Encapsulate(102.0)) == 1);
-  evalhelper(PredicateExecHelper(IsOdd<double>(), Encapsulate(103.0)) == 1);
-  evalhelper(PredicateExecHelper(IsEven<double>(), Encapsulate(103.0)) == 0);
-  evalhelper(PredicateExecHelper(IsZero<double>(), Encapsulate(102.3)) == 0);
-  evalhelper(PredicateExecHelper(IsZero<double>(), Encapsulate(0.0)) == 1);
-  evalhelper(PredicateExecHelper(IsNonZero<double>(), Encapsulate(102.3)) == 1);
-  evalhelper(PredicateExecHelper(InBetween<double>(10.2, 10.8), Encapsulate(10.9)) == 0);
-  evalhelper(PredicateExecHelper(IsDivisibleBy<double>(2.5), Encapsulate(5.0)) == 1);
-  evalhelper(PredicateExecHelper(InBetween<uint8_t>(10, 20), Encapsulate<uint8_t>(42)) == 0);
+  { auto pred = IsEqualEpsilon<double>(0.2, 0.001); evalhelper(PredicateExecHelper(pred, Encapsulate(0.3)) == 0); }
+  { auto pred = IsEqualEpsilon<double>(0.2, 0.1); evalhelper(PredicateExecHelper(pred, Encapsulate(0.3)) == 1); }
+  { auto pred = IsLesserEq<double>(42.5); evalhelper(PredicateExecHelper(pred, Encapsulate(102.3)) == 0); }
+  { auto pred = IsLesserEq<double>(42.5); evalhelper(PredicateExecHelper(pred, Encapsulate(12.3)) == 1); }
+  { auto pred = IsOdd<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(102.3)) == 0); }
+  { auto pred = IsEven<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(102.3)) == 0); }
+  { auto pred = IsOdd<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(102.0)) == 0); }
+  { auto pred = IsEven<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(102.0)) == 1); }
+  { auto pred = IsOdd<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(103.0)) == 1); }
+  { auto pred = IsEven<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(103.0)) == 0); }
+  { auto pred = IsZero<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(102.3)) == 0); }
+  { auto pred = IsZero<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(0.0)) == 1); }
+  { auto pred = IsNonZero<double>(); evalhelper(PredicateExecHelper(pred, Encapsulate(102.3)) == 1); }
+  { auto pred = InBetween<double>(10.2, 10.8); evalhelper(PredicateExecHelper(pred, Encapsulate(10.9)) == 0); }
+  { auto pred = IsDivisibleBy<double>(2.5); evalhelper(PredicateExecHelper(pred, Encapsulate(5.0)) == 1); }
+  { auto pred = InBetween<uint8_t>(10, 20); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(42)) == 0); }
 
-  evalhelper(PredicateExecHelper(IsEqual<double>(3.14159), Encapsulate(3.14159)) == 1);
+  { auto pred = IsEqual<double>(3.14159); evalhelper(PredicateExecHelper(pred, Encapsulate(3.14159)) == 1); }
 
   ForgetPredicates();
 
-  evalhelper(PredicateExecHelper(Obey(testfunc<int>), Encapsulate(41)) == 0);
-  evalhelper(PredicateExecHelper(Obey(testfunc<int>), Encapsulate(42)) == 1);
-  evalhelper(PredicateExecHelper(Obey(testfunc<int>), Encapsulate(43)) == 0);
+  { auto pred = Obey(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(41)) == 0); }
+  { auto pred = Obey(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(42)) == 1); }
+  { auto pred = Obey(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(43)) == 0); }
 
-  evalhelper(PredicateExecHelper(Resist(testfunc<int>), Encapsulate(41)) == 1);
-  evalhelper(PredicateExecHelper(Resist(testfunc<int>), Encapsulate(42)) == 0);
-  evalhelper(PredicateExecHelper(Resist(testfunc<int>), Encapsulate(43)) == 1);
+  { auto pred = Resist(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(41)) == 1); }
+  { auto pred = Resist(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(42)) == 0); }
+  { auto pred = Resist(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(43)) == 1); }
 
   auto allref = MatchAll(isgt10<int>, IsEven<int>());
   evalhelper(PredicateExecHelper(allref, Encapsulate(42)) == 1);
@@ -222,54 +222,59 @@ int main(void) noexcept
   evalhelper(PredicateExecHelper(noneref, Encapsulate(42)) == 0);
 
   auto odd_between_10_and_20 = MatchAll(WithArgs(isbetween, 10, 20), IsOdd<int>());
-
   evalhelper(PredicateExecHelper(odd_between_10_and_20, Encapsulate(42)) == 0);
   evalhelper(PredicateExecHelper(odd_between_10_and_20, Encapsulate(43)) == 0);
   evalhelper(PredicateExecHelper(odd_between_10_and_20, Encapsulate(12)) == 0);
   evalhelper(PredicateExecHelper(odd_between_10_and_20, Encapsulate(13)) == 1);
 
-  evalhelper(PredicateExecHelper(Obey(IsOdd<int>()), Encapsulate(13)) == 1);
-  evalhelper(PredicateExecHelper(Obey(IsOdd<int>()), Encapsulate(42)) == 0);
-  evalhelper(PredicateExecHelper(Resist(IsOdd<int>()), Encapsulate(13)) == 0);
-  evalhelper(PredicateExecHelper(Resist(IsOdd<int>()), Encapsulate(42)) == 1);
+  { auto pred = Obey(IsOdd<int>()); evalhelper(PredicateExecHelper(pred, Encapsulate(13)) == 1); }
+  { auto pred = Obey(IsOdd<int>()); evalhelper(PredicateExecHelper(pred, Encapsulate(42)) == 0); }
+  { auto pred = Resist(IsOdd<int>()); evalhelper(PredicateExecHelper(pred, Encapsulate(13)) == 0); }
+  { auto pred = Resist(IsOdd<int>()); evalhelper(PredicateExecHelper(pred, Encapsulate(42)) == 1); }
 
   // works with lambda
-  evalhelper(PredicateExecHelper(Obey([](const Encapsulator&){ return true; }), Encapsulate(13)) == 1);
-  evalhelper(PredicateExecHelper(Obey([](const Encapsulator&){ return false; }), Encapsulate(13)) == 0);
+  { auto pred = Obey([](const Encapsulator&){ return true; }); evalhelper(PredicateExecHelper(pred, Encapsulate(13)) == 1); }
+  { auto pred = Obey([](const Encapsulator&){ return false; }); evalhelper(PredicateExecHelper(pred, Encapsulate(13)) == 0); }
 
   // hell yeah, no way to get back the type...
-  evalhelper(PredicateExecHelper(Obey(
-    [](const Encapsulator& e)
-    {
-      const auto& result = Decapsulate<int>(e);
-      if (!std::get<0>(result))
+  {
+    auto pred = Obey(
+      [](const Encapsulator& e)
       {
-        return false;
+        const auto& result = Decapsulate<int>(e);
+        if (!std::get<0>(result))
+        {
+          return false;
+        }
+
+        const auto& val = std::get<1>(result);
+        return val == 42;
       }
+    );
+    evalhelper(PredicateExecHelper(pred, Encapsulate(42)) == 1);
+  }
 
-      const auto& val = std::get<1>(result);
-      return val == 42;
-    }
-  ), Encapsulate(42)) == 1);
-
-  evalhelper(PredicateExecHelper(Obey(
-    [](const Encapsulator& e)
-    {
-      const auto& result = Decapsulate<int>(e);
-      if (!std::get<0>(result))
+  {
+    auto pred = Obey(
+      [](const Encapsulator& e)
       {
-        return false;
+        const auto& result = Decapsulate<int>(e);
+        if (!std::get<0>(result))
+        {
+          return false;
+        }
+
+        const auto& val = std::get<1>(result);
+        return val == 42;
       }
+    );
+    evalhelper(PredicateExecHelper(pred, Encapsulate(13)) == 0);
+  }
 
-      const auto& val = std::get<1>(result);
-      return val == 42;
-    }
-  ), Encapsulate(13)) == 0);
-
-  evalhelper(PredicateExecHelper(Obey(sumis15<int>), Encapsulate(twople_t<int>{ 7, 8 })) == 1);
-  evalhelper(PredicateExecHelper(Obey(sumis15<int>), Encapsulate(twople_t<int>{ 8, 7 })) == 1);
-  evalhelper(PredicateExecHelper(Obey(sumis15<int>), Encapsulate(twople_t<int>{ 8, 8 })) == 0);
-  evalhelper(PredicateExecHelper(Obey(sumis15<int>), Encapsulate(twople_t<int>{ 7, 7 })) == 0);
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(twople_t<int>{ 7, 8 })) == 1); }
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(twople_t<int>{ 8, 7 })) == 1); }
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(twople_t<int>{ 8, 8 })) == 0); }
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(twople_t<int>{ 7, 7 })) == 0); }
 
   ForgetPredicates();
 
