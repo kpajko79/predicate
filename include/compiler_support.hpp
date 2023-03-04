@@ -27,7 +27,6 @@
 
 #pragma once
 
-
 #if defined(__has_cpp_attribute) && __has_cpp_attribute(gnu::pure)
 #define PKO_PURE [[gnu::pure]]
 #elif defined(__GNUC__)

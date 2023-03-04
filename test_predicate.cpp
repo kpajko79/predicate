@@ -82,7 +82,7 @@ bool sumis15(const Encapsulator &arg)
 }
 
 #define evalhelper(p) \
-  printf("%s = %u\n", #p, p)
+  fprintf(stderr, "%s = %u\n", #p, p)
 
 int main(void) noexcept
 {

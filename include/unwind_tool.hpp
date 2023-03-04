@@ -34,6 +34,7 @@
 
 #include <sstream>
 #include <memory>
+#include <iomanip>
 
 namespace pajko {
 
@@ -90,10 +91,11 @@ private:
     Dl_info info;
     int status;
 
+    result << "in " << reinterpret_cast<const void*>(ip);
     status = dladdr(reinterpret_cast<const void*>(ip), &info);
     if (status && info.dli_fname && info.dli_fname[0] != '\0') {
-      if (info.dli_fname) result << info.dli_fname;
-      result << "(";
+      if (info.dli_fname) result << " " << info.dli_fname;
+      result << " (";
 
       if (!info.dli_sname) {
         info.dli_saddr = info.dli_fbase;
@@ -119,10 +121,9 @@ private:
         result << sign << reinterpret_cast<const void*>(offset);
       }
     } else {
-      result << "(";
+      result << " (";
     }
-    result << ") [" << reinterpret_cast<const void*>(ip) << "]";
-    result << "[" << reinterpret_cast<const void*>(sp) << "]";
+    result << ") [" << reinterpret_cast<const void*>(sp) << "]";
 
     return result.str();
   }
@@ -132,7 +133,7 @@ private:
     std::ostringstream result;
     unw_context_t uc;
     unw_cursor_t cursor;
-    int frame = 1;
+    int frame = 0;
 
     unw_getcontext(&uc);
     unw_init_local(&cursor, &uc);
@@ -142,7 +143,7 @@ private:
 
       unw_get_reg(&cursor, UNW_REG_IP, &ip);
       unw_get_reg(&cursor, UNW_REG_SP, &sp);
-      result << std::endl << "Frame #" << frame++ << "\t: ";
+      result << std::endl << "Frame " << std::setw(3) << frame++ << " : ";
       result << resolve(ip, sp);
     }
 

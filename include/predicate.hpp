@@ -73,6 +73,7 @@ namespace Predicate {
   auto _result = (result);                                              \
   if (!_result) {                                                       \
     handicap::ostringstream msg;                                        \
+    msg << std::endl;                                                   \
     msg << text;                                                        \
     PKO_PREDICATE_UNWIND_HOOK(msg);                                     \
     PKO_PREDICATE_LOGGER_HELPER(_result, msg.str().c_str());            \
@@ -118,7 +119,7 @@ public:
 
   EncapsulatorImpl(const T& what) noexcept
     : _what(what)
-    {}
+  {}
 
   const void* fetch() const noexcept override
   {
@@ -209,7 +210,7 @@ private:
   WithArgsImpl(func_prototype_t&& func, T&&... args) noexcept
     : _func(std::move(func))
     , _args(std::forward<T>(args)...)
-    {}
+  {}
 
   const func_prototype_t _func;
   const std::tuple<T...> _args;
@@ -275,7 +276,7 @@ private:                                                                        
                                                                                                               \
   name ## Impl(T&& func) noexcept                                                                             \
     : _func(std::move(func))                                                                                  \
-    {}                                                                                                        \
+  {}                                                                                                          \
                                                                                                               \
   const T _func;                                                                                              \
 };                                                                                                            \
@@ -345,7 +346,7 @@ private:                                                                        
                                                                                                                                \
   Match ## name ## Impl(T&&... funcs) noexcept                                                                                 \
     : _funcs(std::forward<T>(funcs)...)                                                                                        \
-    {}                                                                                                                         \
+  {}                                                                                                                           \
                                                                                                                                \
   const std::tuple<T...> _funcs;                                                                                               \
 };                                                                                                                             \
@@ -449,7 +450,7 @@ public:
 private:
   IsEqualImpl(const T (&arg)[N]) noexcept
     : _arg(arg)
-    {}
+  {}
 
   const T* _arg;
 };
@@ -479,7 +480,7 @@ public:
 private:
   IsEqualImpl(T&& arg) noexcept
     : _arg(std::move(arg))
-    {}
+  {}
 
   const T _arg;
 };
@@ -536,7 +537,7 @@ public:                                                                         
                                                                                                 \
 private:                                                                                        \
   name ## Impl() noexcept                                                                       \
-    {}                                                                                          \
+  {}                                                                                            \
 };                                                                                              \
                                                                                                 \
 }; /* namespace impl */                                                                         \
@@ -674,7 +675,7 @@ public:                                                                         
 private:                                                                                        \
   name ## Impl(T&& param) noexcept                                                              \
     : _param(std::move(param))                                                                  \
-    {}                                                                                          \
+  {}                                                                                            \
                                                                                                 \
   const T _param;                                                                               \
 };                                                                                              \
@@ -775,7 +776,7 @@ private:                                                                        
   name ## Impl(T&& p1, T&& p2) noexcept                                                                  \
     : _p1(std::move(p1))                                                                                 \
     , _p2(std::move(p2))                                                                                 \
-    {}                                                                                                   \
+  {}                                                                                                     \
                                                                                                          \
   const T _p1;                                                                                           \
   const T _p2;                                                                                           \
