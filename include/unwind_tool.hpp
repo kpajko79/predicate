@@ -33,6 +33,7 @@
 #include <cxxabi.h>
 
 #include <sstream>
+#include <memory>
 
 namespace pajko {
 
@@ -53,8 +54,35 @@ public:
     return get().unwind();
   }
 
+  static std::string demangle(const char *symbol) noexcept
+  {
+    return get().demangleHelper(symbol);
+  }
+
 private:
   Unwinder() noexcept = default;
+
+  std::string demangleHelper(const char* symbol) const noexcept
+  {
+    size_t size = 128;
+    int status;
+
+    auto buffer = std::unique_ptr<char, decltype(&std::free)>(static_cast<char*>(std::malloc(size)), &std::free);
+    auto demangled = abi::__cxa_demangle(symbol, buffer.get(), &size, &status);
+    if (demangled) {
+      symbol = demangled;
+      // the object has potentially been freed
+      buffer.release();
+      // and reallocated
+      buffer.reset(demangled);
+    }
+
+    // the buffer is going to be deallocated automatically, hopefully not ruining the RVO
+    // if cppreference is right in (4), string(char*, size_t) would do assignment in place,
+    // which is wrong here as Kansas is going bye-bye
+    // however cppreference (5) explicitly says that string(char*) copies
+    return std::string{ symbol };
+  }
 
   std::string resolve(unw_word_t ip, unw_word_t sp) const noexcept
   {
@@ -85,17 +113,7 @@ private:
         }
 
         if (info.dli_sname) {
-          auto sym = info.dli_sname;
-          size_t size = 128;
-
-          auto buffer = static_cast<char*>(malloc(size));
-          auto demangled = abi::__cxa_demangle(sym, buffer, &size, &status);
-          if (demangled) {
-            sym = demangled;
-            buffer = demangled;
-          }
-          result << sym;
-          free(buffer);
+          result << demangleHelper(info.dli_sname);
         }
 
         result << sign << reinterpret_cast<const void*>(offset);
