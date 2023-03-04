@@ -153,7 +153,7 @@ auto Encapsulate(const T& what) noexcept ->
     impl::EncapsulatorImpl<T>
   >::type
 {
-  return impl::EncapsulatorImpl<T>(std::move(what));
+  return impl::EncapsulatorImpl<T>(what);
 }
 
 template <typename T>
