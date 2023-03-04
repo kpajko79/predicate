@@ -153,20 +153,20 @@ int main(void) noexcept
   evalhelper(PredicateExecHelper(IsEqual(42), Encapsulate(24)) == 0);
 
   evalhelper(PredicateExecHelper(IsOdd<uint8_t>(), Encapsulate<uint8_t>(42)) == 0);
-  evalhelper(PredicateExecHelper(IsEven<uint8_t>(), Encapsulate(21)) == 0);
-  evalhelper(PredicateExecHelper(IsDivisibleBy<uint8_t>(7), Encapsulate(42)) == 1);
-  evalhelper(PredicateExecHelper(IsDivisibleBy<uint8_t>(7), Encapsulate(43)) == 0);
-  evalhelper(PredicateExecHelper(InBetween<uint8_t>(10, 20), Encapsulate(15)) == 1);
-  evalhelper(PredicateExecHelper(InBetween<uint8_t>(10, 20), Encapsulate(42)) == 0);
-  evalhelper(PredicateExecHelper(Outside<uint8_t>(10, 20), Encapsulate(42)) == 1);
-  evalhelper(PredicateExecHelper(Outside<uint8_t>(10, 20), Encapsulate(15)) == 0);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate(12)) == 0);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate(13)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate(14)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate(15)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate(16)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate(17)) == 1);
-  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate(18)) == 0);
+  evalhelper(PredicateExecHelper(IsEven<uint8_t>(), Encapsulate<uint8_t>(21)) == 0);
+  evalhelper(PredicateExecHelper(IsDivisibleBy<uint8_t>(7), Encapsulate<uint8_t>(42)) == 1);
+  evalhelper(PredicateExecHelper(IsDivisibleBy<uint8_t>(7), Encapsulate<uint8_t>(43)) == 0);
+  evalhelper(PredicateExecHelper(InBetween<uint8_t>(10, 20), Encapsulate<uint8_t>(15)) == 1);
+  evalhelper(PredicateExecHelper(InBetween<uint8_t>(10, 20), Encapsulate<uint8_t>(42)) == 0);
+  evalhelper(PredicateExecHelper(Outside<uint8_t>(10, 20), Encapsulate<uint8_t>(42)) == 1);
+  evalhelper(PredicateExecHelper(Outside<uint8_t>(10, 20), Encapsulate<uint8_t>(15)) == 0);
+  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(12)) == 0);
+  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(13)) == 1);
+  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(14)) == 1);
+  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(15)) == 1);
+  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(16)) == 1);
+  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(17)) == 1);
+  evalhelper(PredicateExecHelper(IsEqualEpsilon<uint8_t>(15, 2), Encapsulate<uint8_t>(18)) == 0);
 
   evalhelper(PredicateExecHelper(IsEqualEpsilon<double>(0.2, 0.001), Encapsulate(0.3)) == 0);
   evalhelper(PredicateExecHelper(IsEqualEpsilon<double>(0.2, 0.1), Encapsulate(0.3)) == 1);
