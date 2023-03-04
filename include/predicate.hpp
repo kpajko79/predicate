@@ -31,6 +31,7 @@
 #include <cstring>
 #include <functional>
 #include <type_traits>
+#include <typeinfo>
 #include <vector>
 #include <cmath>
 
@@ -92,6 +93,9 @@ public:
     return this;
   }
 
+  virtual size_t hash_code() const noexcept = 0;
+  virtual const char* type_name() const noexcept = 0;
+
 protected:
   Encapsulator() noexcept = default;
 };
@@ -119,6 +123,7 @@ public:
 
   EncapsulatorImpl(const T& what) noexcept
     : _what(what)
+    , _ti(typeid(T))
   {}
 
   const void* fetch() const noexcept override
@@ -126,8 +131,19 @@ public:
     return &_what;
   }
 
+  size_t hash_code() const noexcept override
+  {
+    return _ti.hash_code();
+  }
+
+  const char* type_name() const noexcept override
+  {
+    return _ti.name();
+  }
+
 private:
   const T _what;
+  const std::type_info& _ti;
 };
 
 }; /* namespace impl */
@@ -158,9 +174,19 @@ auto Encapsulate(const T& what) noexcept ->
 }
 
 template <typename T>
-inline const T& Decapsulate(const Encapsulator& what) noexcept
+inline std::tuple<bool, const T&> Decapsulate(const Encapsulator& what) noexcept
 {
-  return *(reinterpret_cast<const T*>(what.fetch()));
+  const std::type_info& ti = typeid(T);
+
+  auto result = PKO_PREDICATE_LOGGER(ti.hash_code() == what.hash_code(),
+      "The actual value has type '"
+      << ::pajko::tools::Unwinder::decodeTypeName(what.type_name())
+      << "' while the expected was '"
+      << ::pajko::tools::Unwinder::decodeTypeName(ti.name())
+      << "'"
+  );
+
+  return { result, *(reinterpret_cast<const T*>(what.fetch())) };
 }
 
 inline void ForgetPredicates() noexcept
@@ -471,7 +497,13 @@ public:
 
   bool execute(const Encapsulator& what) const noexcept override
   {
-    auto val = Decapsulate<T>(what);
+    const auto& result = Decapsulate<T>(what);
+    if (!std::get<0>(result))
+    {
+      return false;
+    }
+
+    const auto& val = std::get<1>(result);
     return PKO_PREDICATE_LOGGER(val == _arg, "Predicate IsEqual(" << _arg << ") failed for value " << val);
   }
 
@@ -527,10 +559,17 @@ public:                                                                         
                                                                                                 \
   bool execute(const Encapsulator& what) const noexcept override                                \
   {                                                                                             \
-    auto val = Decapsulate<T>(what);                                                            \
-    auto result = [](T arg) noexcept {filter}(val);                                             \
-    PKO_PREDICATE_LOGGER(result, "Predicate " #name "() failed for value " << val);             \
-    return result;                                                                              \
+    const auto& result = Decapsulate<T>(what);                                                  \
+    if (!std::get<0>(result))                                                                   \
+    {                                                                                           \
+      return false;                                                                             \
+    }                                                                                           \
+                                                                                                \
+    const auto& val = std::get<1>(result);                                                      \
+    return PKO_PREDICATE_LOGGER(                                                                \
+      [](T arg) noexcept {filter}(val),                                                         \
+      "Predicate " #name "() failed for value " << val                                          \
+    );                                                                                          \
   }                                                                                             \
                                                                                                 \
   ~name ## Impl() noexcept override = default;                                                  \
@@ -664,10 +703,17 @@ public:                                                                         
                                                                                                 \
   bool execute(const Encapsulator& what) const noexcept override                                \
   {                                                                                             \
-    auto val = Decapsulate<T>(what);                                                            \
-    auto result = [](T arg, T param) noexcept {filter}(val, _param);                            \
-    PKO_PREDICATE_LOGGER(result, "Predicate " #name "(" << _param << ") failed for value " << val); \
-    return result;                                                                              \
+    const auto& result = Decapsulate<T>(what);                                                  \
+    if (!std::get<0>(result))                                                                   \
+    {                                                                                           \
+      return false;                                                                             \
+    }                                                                                           \
+                                                                                                \
+    const auto& val = std::get<1>(result);                                                      \
+    return PKO_PREDICATE_LOGGER(                                                                \
+      [](T arg, T param) noexcept {filter}(val, _param),                                        \
+      "Predicate " #name "(" << _param << ") failed for value " << val                          \
+    );                                                                                          \
   }                                                                                             \
                                                                                                 \
   ~name ## Impl() noexcept override = default;                                                  \
@@ -764,10 +810,17 @@ public:                                                                         
                                                                                                          \
   bool execute(const Encapsulator& what) const noexcept override                                         \
   {                                                                                                      \
-    auto val = Decapsulate<T>(what);                                                                     \
-    auto result = [](T arg, T param1, T param2) noexcept {filter}(val, _p1, _p2);                        \
-    PKO_PREDICATE_LOGGER(result, "Predicate " #name "(" << _p1 << ", " << _p2 << ") failed for value " << val); \
-    return result;                                                                                       \
+    const auto& result = Decapsulate<T>(what);                                                           \
+    if (!std::get<0>(result))                                                                            \
+    {                                                                                                    \
+      return false;                                                                                      \
+    }                                                                                                    \
+                                                                                                         \
+    const auto& val = std::get<1>(result);                                                               \
+    return PKO_PREDICATE_LOGGER(                                                                         \
+      [](T arg, T param1, T param2) noexcept {filter}(val, _p1, _p2),                                    \
+      "Predicate " #name "(" << _p1 << ", " << _p2 << ") failed for value " << val                       \
+    );                                                                                                   \
   }                                                                                                      \
                                                                                                          \
   ~name ## Impl() noexcept override = default;                                                           \

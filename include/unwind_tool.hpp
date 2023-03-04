@@ -60,6 +60,17 @@ public:
     return get().demangleHelper(symbol);
   }
 
+  static std::string decodeTypeName(const char *type_name) noexcept
+  {
+#if defined(__GNUC__)
+    // cppreference says gcc and clang return mangled name
+    return get().demangleHelper(type_name);
+#else
+   // while others return a human readable name
+   return std::string{ type_name };
+#endif
+  }
+
 private:
   Unwinder() noexcept = default;
 
