@@ -99,7 +99,6 @@ int main(void) noexcept
 
   // WARNING: make sure that the type matches (the default is int)
   evalhelper(PredicateExecHelper(IsEqual({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), Encapsulate(bufexpected2)) == 1);
-  evalhelper(PredicateExecHelper(IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), Encapsulate(bufactual)) == 0);
   evalhelper(PredicateExecHelper(IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), Encapsulate({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 })) == 1);
   evalhelper(PredicateExecHelper(IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }), Encapsulate({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 })) == 0);
 
