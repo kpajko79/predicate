@@ -280,9 +280,9 @@ int main() noexcept
   // use this as general form to pack any number of parameters of any type
   { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(std::make_tuple(7, 8))) == 1); }
   // type checking also works here
-  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(std::make_tuple(7U, 8))) == 1); }
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(std::make_tuple(7U, 8))) == 0); }
   // as well as checking the number of parameters
-  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(std::make_tuple(7, 8, 9))) == 1); }
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(std::make_tuple(7, 8, 9))) == 0); }
 
   ForgetPredicates();
 
