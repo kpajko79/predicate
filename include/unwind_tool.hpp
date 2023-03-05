@@ -171,6 +171,6 @@ private:
 #endif
 };
 
-}; /* namespace tools */
+} /* namespace tools */
 
-}; /* namespace pajko */
+} /* namespace pajko */

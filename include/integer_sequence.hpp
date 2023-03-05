@@ -54,4 +54,4 @@ using make_index_sequence = make_integer_sequence<std::size_t, N>;
 template<typename... T>
 using index_sequence_for = make_index_sequence<sizeof...(T)>;
 
-}; /* namespace detail */
+} /* namespace detail */

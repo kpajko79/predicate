@@ -151,7 +151,7 @@ private:
 template <typename T, size_t N>
 using array_wrapper = std::tuple<const T(&)[N]>;
 
-}; /* namespace impl */
+} /* namespace impl */
 
 template <typename T, size_t N>
 inline
@@ -264,7 +264,7 @@ private:
   const std::tuple<T...> _args;
 };
 
-}; /* namespace impl */
+} /* namespace impl */
 
 template <typename... T>
 inline const void* WithArgs(std::function<bool(const Encapsulator& arg, T...)>&& func, T&&... args) noexcept
@@ -329,7 +329,7 @@ private:                                                                        
   const T _func;                                                                                              \
 };                                                                                                            \
                                                                                                               \
-}; /* namespace impl */                                                                                       \
+} /* namespace impl */                                                                                        \
                                                                                                               \
 template <typename T>                                                                                         \
 inline const void* name(T&& func) noexcept                                                                    \
@@ -398,7 +398,7 @@ private:                                                                        
   const std::tuple<T...> _funcs;                                                                                               \
 };                                                                                                                             \
                                                                                                                                \
-}; /* namespace impl */                                                                                                        \
+} /* namespace impl */                                                                                                         \
                                                                                                                                \
 template<typename... T>                                                                                                        \
 inline const void* Match ## name(T&&... funcs) noexcept                                                                        \
@@ -442,9 +442,9 @@ PKO_PURE inline bool MatcherHelperOne(std::vector<bool>&& results) noexcept
   return true;
 }
 
-}; /* namespace helper */
+} /* namespace helper */
 
-}; /* namespace impl */
+} /* namespace impl */
 
 PKO_PREDICATE_MATCHER_GENERATOR(All)
 PKO_PREDICATE_MATCHER_GENERATOR(Any)
@@ -542,7 +542,7 @@ private:
   const T _arg;
 };
 
-}; /* namespace impl */
+} /* namespace impl */
 
 template <typename T, size_t N>
 inline
@@ -604,7 +604,7 @@ private:                                                                        
   {}                                                                                            \
 };                                                                                              \
                                                                                                 \
-}; /* namespace impl */                                                                         \
+} /* namespace impl */                                                                          \
                                                                                                 \
 template <typename T>                                                                           \
 inline                                                                                          \
@@ -695,9 +695,9 @@ inline auto IsEvenHelper(T&& arg) noexcept ->
   return fmodf(arg, 2.0f) == 0.0f;
 }
 
-}; /* namespace helper */
+} /* namespace helper */
 
-}; /* namespace impl */
+} /* namespace impl */
 
 // auto in lambda would be C++14
 PKO_PREDICATE_FILTER_GENERATOR(IsOdd, return helper::IsOddHelper(std::move(arg));)
@@ -751,7 +751,7 @@ private:                                                                        
   const T _param;                                                                               \
 };                                                                                              \
                                                                                                 \
-}; /* namespace impl */                                                                         \
+} /* namespace impl */                                                                          \
                                                                                                 \
 template <typename T>                                                                           \
 inline                                                                                          \
@@ -803,9 +803,9 @@ inline auto IsDivisibleByHelper(T&& arg, T&& param) noexcept ->
   return fmodf(arg, param) == 0.0f;
 }
 
-}; /* namespace helper */
+} /* namespace helper */
 
-}; /* namespace impl */
+} /* namespace impl */
 
 // auto in lambda would be C++14
 PKO_PREDICATE_FILTER_GENERATOR_PARAM(IsDivisibleBy, return helper::IsDivisibleByHelper(std::move(arg), std::move(param));)
@@ -860,7 +860,7 @@ private:                                                                        
   const T _p2;                                                                                           \
 };                                                                                                       \
                                                                                                          \
-}; /* namespace impl */                                                                                  \
+} /* namespace impl */                                                                                   \
                                                                                                          \
 template <typename T>                                                                                    \
 inline                                                                                                   \
@@ -881,9 +881,9 @@ bool PredicateExecHelper(const void* expected, const void* actual) noexcept
   return predicate->execute(*reinterpret_cast<const Encapsulator*>(actual));
 }
 
-}; /* namespace Predicate */
+} /* namespace Predicate */
 
-}; /* namespace pajko */
+} /* namespace pajko */
 
 // leave PKO_PREDICATE_LOGGER macro available for external use
 // PKO_PREDICATE_UNWIND_HOOK is required as well

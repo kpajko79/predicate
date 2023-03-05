@@ -262,6 +262,6 @@ inline void swap(std::basic_ostringstream<CharT, Traits, Alloc>& lhs, handicap_o
   lhs.swap(rhs);
 }
 
-}; /* namespace handicap */
+} /* namespace handicap */
 
-}; /* namespace pajko */
+} /* namespace pajko */
