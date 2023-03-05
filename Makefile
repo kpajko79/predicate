@@ -28,10 +28,10 @@
 #  SPDX-License-Identifier: Unlicense
 #
 
-CPP := gcc
-CC := gcc
-CXX := g++
-CXXLD := g++
+CPP := $(TOOLCHAIN_PATH)gcc
+CC := $(TOOLCHAIN_PATH)gcc
+CXX := $(TOOLCHAIN_PATH)g++
+CXXLD := $(TOOLCHAIN_PATH)g++
 CPPCHECK := cppcheck
 
 RM := rm -f
@@ -132,7 +132,7 @@ LDFLAGS := \
 	$(if $(findstring clang,$(CXX)),-stdlib=$(CLANG_STDLIB)) \
 	-rdynamic
 
-LDLIBS := -lunwind
+LDLIBS := -lunwind -ldl
 
 backslash := \\
 openingbrace := (
@@ -170,6 +170,7 @@ CPPCHECK_FLAGS := \
 	--std=c++11 \
 	--enable=all \
 	--inline-suppr \
+	--inconclusive \
 	--report-progress
 
 all: $(BUILD_DIR)/test_predicate $(BUILD_DIR)/test_predicate_dbghook
@@ -186,7 +187,7 @@ analyzer: $(BUILD_DIR)/test_predicate_analyzer
 	$(addprefix ./,$<)
 
 $(BUILD_DIR)/%: $(BUILD_DIR)/%.o
-	$(CXXLD) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	$(CXXLD) $(CPPFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(BUILD_DIR)/test_predicate_asan: LDFLAGS += $(ASAN_FLAGS)
 $(BUILD_DIR)/test_predicate_ubsan: LDFLAGS += $(UBSAN_FLAGS)
