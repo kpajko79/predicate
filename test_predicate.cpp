@@ -282,6 +282,13 @@ int main(void) noexcept
   { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(twople_t<int>{ 8, 8 })) == 0); }
   { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(twople_t<int>{ 7, 7 })) == 0); }
 
+  // use this as general form to pack any number of parameters of any type
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(std::make_tuple(7, 8))) == 1); }
+  // type checking also works here
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(std::make_tuple(7U, 8))) == 1); }
+  // as well as checking the number of parameters
+  { auto pred = Obey(sumis15<int>); evalhelper(PredicateExecHelper(pred, Encapsulate(std::make_tuple(7, 8, 9))) == 1); }
+
   ForgetPredicates();
 
   return 0;
