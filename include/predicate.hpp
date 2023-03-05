@@ -146,20 +146,23 @@ private:
   const std::type_info& _ti;
 };
 
+template <typename T, size_t N>
+using array_wrapper = std::tuple<const T(&)[N]>;
+
 }; /* namespace impl */
 
 template <typename T, size_t N>
 inline
-auto Encapsulate(const T (&arg)[N]) noexcept -> const void*
+impl::EncapsulatorImpl<impl::array_wrapper<T, N>> Encapsulate(const T (&arg)[N]) noexcept
 {
-  return &arg;
+  return impl::array_wrapper<T, N>{ arg };
 }
 
 template <typename T, size_t N>
 inline
-auto Encapsulate(T (&&arg)[N]) noexcept -> const void*
+impl::EncapsulatorImpl<impl::array_wrapper<T, N>> Encapsulate(T (&&arg)[N]) noexcept
 {
-  return &arg;
+  return impl::array_wrapper<T, N>{ std::cref(arg) };
 }
 
 template <typename T>
@@ -170,7 +173,23 @@ auto Encapsulate(const T& what) noexcept ->
     impl::EncapsulatorImpl<T>
   >::type
 {
-  return impl::EncapsulatorImpl<T>(what);
+  return what;
+}
+
+template <typename T, size_t N>
+inline std::tuple<bool, const T(&)[N]> Decapsulate(const Encapsulator& what) noexcept
+{
+  const std::type_info& ti = typeid(impl::array_wrapper<T, N>);
+
+  auto result = PKO_PREDICATE_LOGGER(ti.hash_code() == what.hash_code(),
+      "The actual value has type '"
+      << ::pajko::tools::Unwinder::decodeTypeName(what.type_name())
+      << "' while the expected was '"
+      << ::pajko::tools::Unwinder::decodeTypeName(ti.name())
+      << "'"
+  );
+
+  return { result, std::get<0>(*reinterpret_cast<const impl::array_wrapper<T, N>*>(what.fetch())) };
 }
 
 template <typename T>
@@ -464,28 +483,50 @@ public:
     return instancePtr;
   }
 
-  bool execute(const Encapsulator& value) const noexcept override
+  static const void* checker(T (&&arg)[N]) noexcept
   {
-    auto val = reinterpret_cast<const T*>(&value);
-    auto result = memcmp(val, _arg, N * sizeof(T)) == 0;
-    return result;
+    auto instance = std::unique_ptr<IsEqualImpl<T, N>>(new IsEqualImpl<T, N>(std::move(arg)));
+    auto instancePtr = instance.get();
+    holder.emplace_back(std::move(instance));
+    return instancePtr;
+  }
+
+  bool execute(const Encapsulator& what) const noexcept override
+  {
+    const auto& result = Decapsulate<T, N>(what);
+    if (!std::get<0>(result))
+    {
+      return false;
+    }
+
+    const auto& val = std::get<1>(result);
+    return PKO_PREDICATE_LOGGER(
+      std::memcmp(_arg, &val, N * sizeof(T)) == 0,
+      "Predicate IsEqual(" << _arg << ") failed for value " << val
+    );
   }
 
   ~IsEqualImpl() noexcept override = default;
 
 private:
   IsEqualImpl(const T (&arg)[N]) noexcept
-    : _arg(arg)
-  {}
+  {
+    std::memcpy(_arg, arg, N * sizeof(T));
+  }
 
-  const T* _arg;
+  IsEqualImpl(T (&&arg)[N]) noexcept
+  {
+    std::memcpy(_arg, arg, N * sizeof(T));
+  }
+
+  T _arg[N];
 };
 
 template <typename T>
 class IsEqualImpl<T, 0> : public Predicate
 {
 public:
-  IsEqualImpl<T, 0>() noexcept = delete;
+  IsEqualImpl() noexcept = delete;
 
   static const void* checker(T&& arg) noexcept
   {
@@ -530,7 +571,7 @@ template <typename T, size_t N>
 inline
 const void* IsEqual(T (&&arg)[N]) noexcept
 {
-  return impl::IsEqualImpl<T, N>::checker(arg);
+  return impl::IsEqualImpl<T, N>::checker(std::move(arg));
 }
 
 template <typename T>

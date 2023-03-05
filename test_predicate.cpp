@@ -130,9 +130,12 @@ int main(void) noexcept
 
   { auto pred = IsEqual(bufexpected); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 0); }
   { auto pred = IsEqual(bufactual); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 1); }
+  // type checking should catch this
+  { auto pred = IsEqual(bufexpected); evalhelper(PredicateExecHelper(pred, Encapsulate(bufexpected2)) == 0); }
 
-  // WARNING: make sure that the type matches (the default is int)
   { auto pred = IsEqual({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}); evalhelper(PredicateExecHelper(pred, Encapsulate(bufexpected2)) == 1); }
+  // type check should catch this
+  { auto pred = IsEqual({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}); evalhelper(PredicateExecHelper(pred, Encapsulate(bufexpected)) == 0); }
   { auto pred = IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }); evalhelper(PredicateExecHelper(pred, Encapsulate({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 })) == 1); }
   { auto pred = IsEqual({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }); evalhelper(PredicateExecHelper(pred, Encapsulate({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 })) == 0); }
 
@@ -145,6 +148,9 @@ int main(void) noexcept
   { auto pred = IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 9}); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 0); }
   { auto pred = IsEqual((uint8_t []){0, 1, 2, 3, 4, 5, 6, 7, 8, 10}); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 1); }
 #pragma GCC diagnostic pop
+
+  { uint8_t buf[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }; auto pred = IsEqual(buf); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 0); }
+  { uint8_t buf[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }; auto pred = IsEqual(buf); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 1); }
 
   { auto pred = IsEqual(std::array<uint8_t, 10>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }); evalhelper(PredicateExecHelper(pred, Encapsulate(arr)) == 1); }
   { auto pred = IsEqual(std::vector<uint8_t>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 }); evalhelper(PredicateExecHelper(pred, Encapsulate(vec)) == 1); }
