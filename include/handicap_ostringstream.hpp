@@ -58,7 +58,7 @@ public:
    : stream(std::move(other.stream))
   {}
 
-  handicap_ostringstream(super&& other) noexcept
+  explicit handicap_ostringstream(super&& other) noexcept
    : stream(std::move(other))
   {}
 
@@ -204,7 +204,6 @@ public:
   >::type
   {
     return printArray(&a[0], N);
-    return *this;
   }
 
   handicap_ostringstream& operator<<(stream_type& (*manip)(stream_type&))

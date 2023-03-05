@@ -24,6 +24,14 @@
 
 #pragma once
 
+#include "integer_sequence.hpp"
+#include "handicap_ostringstream.hpp"
+#include "compiler_support.hpp"
+
+#if defined(PKO_PREDICATE_ENABLE_BACKTRACE) && !defined(PKO_PREDICATE_DEBUGBREAK)
+#include "unwind_tool.hpp"
+#endif
+
 #include <memory>
 #include <cassert>
 #include <cstdint>
@@ -34,14 +42,7 @@
 #include <typeinfo>
 #include <vector>
 #include <cmath>
-
-#include "integer_sequence.hpp"
-#include "handicap_ostringstream.hpp"
-#include "compiler_support.hpp"
-
-#if defined(PKO_PREDICATE_ENABLE_BACKTRACE) && !defined(PKO_PREDICATE_DEBUGBREAK)
-#include "unwind_tool.hpp"
-#endif
+#include <algorithm>
 
 namespace pajko {
 
@@ -121,7 +122,7 @@ public:
   EncapsulatorImpl() noexcept = delete;
   ~EncapsulatorImpl() noexcept = default;
 
-  EncapsulatorImpl(const T& what) noexcept
+  explicit EncapsulatorImpl(const T& what) noexcept
     : _what(what)
     , _ti(typeid(T))
   {}
@@ -155,14 +156,14 @@ template <typename T, size_t N>
 inline
 impl::EncapsulatorImpl<impl::array_wrapper<T, N>> Encapsulate(const T (&arg)[N]) noexcept
 {
-  return impl::array_wrapper<T, N>{ arg };
+  return impl::EncapsulatorImpl<impl::array_wrapper<T, N>>(impl::array_wrapper<T, N>{ arg });
 }
 
 template <typename T, size_t N>
 inline
 impl::EncapsulatorImpl<impl::array_wrapper<T, N>> Encapsulate(T (&&arg)[N]) noexcept
 {
-  return impl::array_wrapper<T, N>{ std::cref(arg) };
+  return impl::EncapsulatorImpl<impl::array_wrapper<T, N>>(impl::array_wrapper<T, N>{ std::cref(arg) });
 }
 
 template <typename T>
@@ -173,7 +174,7 @@ auto Encapsulate(const T& what) noexcept ->
     impl::EncapsulatorImpl<T>
   >::type
 {
-  return what;
+  return impl::EncapsulatorImpl<T>(what);
 }
 
 template <typename T, size_t N>
@@ -230,7 +231,7 @@ public:
     return instancePtr;
   }
 
-  static const void* create(bool(*func)(const Encapsulator& arg, T...), T&&... args) noexcept
+  static const void* create(bool(&func)(const Encapsulator& arg, T...), T&&... args) noexcept
   {
     return create(func_prototype_t(func), std::forward<T>(args)...);
   }
@@ -270,7 +271,7 @@ inline const void* WithArgs(std::function<bool(const Encapsulator& arg, T...)>&&
 }
 
 template <typename... T>
-inline const void* WithArgs(bool(*func)(const Encapsulator& arg, T...), T&&... args) noexcept
+inline const void* WithArgs(bool(&func)(const Encapsulator& arg, T...), T&&... args) noexcept
 {
   return impl::WithArgsImpl<T...>::create(func, std::forward<T>(args)...);
 }
@@ -319,7 +320,7 @@ private:                                                                        
     return _func(what);                                                                                       \
   }                                                                                                           \
                                                                                                               \
-  name ## Impl(T&& func) noexcept                                                                             \
+  explicit name ## Impl(T&& func) noexcept                                                                    \
     : _func(std::move(func))                                                                                  \
   {}                                                                                                          \
                                                                                                               \
@@ -365,7 +366,7 @@ public:                                                                         
   ~Match ## name ## Impl() noexcept override = default;                                                                        \
                                                                                                                                \
 private:                                                                                                                       \
-  inline bool executeHelper2(bool (*func)(const Encapsulator&), const Encapsulator& what) const noexcept                       \
+  inline bool executeHelper2(bool (&func)(const Encapsulator&), Encapsulator& what) const noexcept                             \
   {                                                                                                                            \
     return func(what);                                                                                                         \
   }                                                                                                                            \
@@ -389,7 +390,7 @@ private:                                                                        
     return helper::MatcherHelper ## name(std::move(results));                                                                  \
   }                                                                                                                            \
                                                                                                                                \
-  Match ## name ## Impl(T&&... funcs) noexcept                                                                                 \
+  explicit Match ## name ## Impl(T&&... funcs) noexcept                                                                        \
     : _funcs(std::forward<T>(funcs)...)                                                                                        \
   {}                                                                                                                           \
                                                                                                                                \
@@ -410,35 +411,17 @@ namespace helper {
 
 PKO_PURE inline bool MatcherHelperAll(std::vector<bool>&& results) noexcept
 {
-  bool result = true;
-
-  for (auto r : results) {
-    result &= r;
-  }
-
-  return result;
+  return std::all_of(results.cbegin(), results.cend(), [](bool b){ return b; });
 }
 
 PKO_PURE inline bool MatcherHelperNone(std::vector<bool>&& results) noexcept
 {
-  bool result = false;
-
-  for (auto r : results) {
-    result |= r;
-  }
-
-  return !result;
+  return std::none_of(results.cbegin(), results.cend(), [](bool b){ return b; });
 }
 
 PKO_PURE inline bool MatcherHelperAny(std::vector<bool>&& results) noexcept
 {
-  for (auto r : results) {
-    if (r) {
-      return true;
-    }
-  }
-
-  return false;
+  return std::any_of(results.cbegin(), results.cend(), [](bool b){ return b; });
 }
 
 PKO_PURE inline bool MatcherHelperOne(std::vector<bool>&& results) noexcept
@@ -509,12 +492,12 @@ public:
   ~IsEqualImpl() noexcept override = default;
 
 private:
-  IsEqualImpl(const T (&arg)[N]) noexcept
+  explicit IsEqualImpl(const T (&arg)[N]) noexcept
   {
     std::memcpy(_arg, arg, N * sizeof(T));
   }
 
-  IsEqualImpl(T (&&arg)[N]) noexcept
+  explicit IsEqualImpl(T (&&arg)[N]) noexcept
   {
     std::memcpy(_arg, arg, N * sizeof(T));
   }
@@ -551,7 +534,7 @@ public:
   ~IsEqualImpl() noexcept override = default;
 
 private:
-  IsEqualImpl(T&& arg) noexcept
+  explicit IsEqualImpl(T&& arg) noexcept
     : _arg(std::move(arg))
   {}
 
@@ -760,7 +743,7 @@ public:                                                                         
   ~name ## Impl() noexcept override = default;                                                  \
                                                                                                 \
 private:                                                                                        \
-  name ## Impl(T&& param) noexcept                                                              \
+  explicit name ## Impl(T&& param) noexcept                                                     \
     : _param(std::move(param))                                                                  \
   {}                                                                                            \
                                                                                                 \

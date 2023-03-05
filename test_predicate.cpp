@@ -42,6 +42,7 @@ using namespace pajko;
 using namespace pajko::Predicate;
 
 template <typename T>
+// cppcheck-suppress unusedFunction
 bool testfunc(const Encapsulator& arg)
 {
   const auto& result = Decapsulate<T>(arg);
@@ -55,19 +56,7 @@ bool testfunc(const Encapsulator& arg)
 }
 
 template <typename T>
-bool iseven(const Encapsulator& arg)
-{
-  const auto& result = Decapsulate<T>(arg);
-  if (!std::get<0>(result))
-  {
-    return false;
-  }
-
-  const auto& val = std::get<1>(result);
-  return PKO_PREDICATE_LOGGER((val % 2) == 0, val << " is not even");
-}
-
-template <typename T>
+// cppcheck-suppress unusedFunction
 bool isgt10(const Encapsulator& arg)
 {
   const auto& result = Decapsulate<T>(arg);
@@ -97,6 +86,7 @@ template <typename T>
 using twople_t = std::tuple<T, T>;
 
 template <typename T>
+// cppcheck-suppress unusedFunction
 bool sumis15(const Encapsulator &arg)
 {
   const auto& result = Decapsulate<twople_t<T>>(arg);
@@ -125,7 +115,9 @@ int main(void) noexcept
 
   int bufexpected2[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
+  // cppcheck-suppress variableScope
   std::array<uint8_t, 10> arr{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 };
+  // cppcheck-suppress variableScope
   std::vector<uint8_t> vec{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10 };
 
   { auto pred = IsEqual(bufexpected); evalhelper(PredicateExecHelper(pred, Encapsulate(bufactual)) == 0); }
