@@ -33,6 +33,7 @@ CC := $(TOOLCHAIN_PATH)gcc
 CXX := $(TOOLCHAIN_PATH)g++
 CXXLD := $(TOOLCHAIN_PATH)g++
 CPPCHECK := cppcheck
+CLANG_TIDY := clang-tidy-15
 
 RM := rm -f
 RMDIR := rm -rf
@@ -221,6 +222,9 @@ $(BUILD_DIR):
 
 cppcheck: test_predicate.cpp
 	$(CPPCHECK) $(CPPCHECK_FLAGS) $<
+
+tidy: test_predicate.cpp
+	$(CLANG_TIDY) --config-file=.clang-tidy -header-filter=.* $< -- $(CPPFLAGS)
 
 .PHONY: clean cppcheck
 
