@@ -107,7 +107,7 @@ bool sumis15(const Encapsulator &arg)
 #define evalhelper(p) \
   fprintf(stderr, "%s = %u\n", #p, p)
 
-int main(void) noexcept
+int main() noexcept
 {
   // test type matching (the first one should pass if the types would match)
   { auto pred = Obey(testfunc<int>); evalhelper(PredicateExecHelper(pred, Encapsulate<uint8_t>(42)) == 0); }

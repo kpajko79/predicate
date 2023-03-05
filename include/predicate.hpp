@@ -121,7 +121,7 @@ class EncapsulatorImpl : public Encapsulator
 {
 public:
   EncapsulatorImpl() noexcept = delete;
-  ~EncapsulatorImpl() noexcept = default;
+  ~EncapsulatorImpl() noexcept override = default;
 
   explicit EncapsulatorImpl(const T& what) noexcept
     : _what(what)
@@ -255,7 +255,7 @@ private:
     return _func(what, std::get<Is>(_args)...);
   }
 
-  WithArgsImpl(func_prototype_t&& func, T&&... args) noexcept
+  explicit WithArgsImpl(func_prototype_t&& func, T&&... args) noexcept
     : _func(std::move(func))
     , _args(std::forward<T>(args)...)
   {}
