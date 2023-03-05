@@ -144,16 +144,10 @@ CINCLUDES := $(addprefix -I, $(shell $(CC) $(CFLAGS) -E -Wp,-v -xc /dev/null 2> 
 CXXINCLUDES := $(addprefix -I, $(shell $(CXX) $(CXXFLAGS) -E -Wp,-v -xc++ /dev/null 2> /dev/stdout | grep -e "^ "))
 
 CMACROS := $(shell $(CC) $(CFLAGS) -E -dM -xc /dev/null 2> /dev/stdout | \
-	sed -E "s/#define ([^ ]*) $(quote)?([^$(quote)]*)$(quote)?/-D\1=$(quote)\2$(quote)/g; \
-		s/$(backslash)$(openingbrace)/$(backlash)$(backslash)$(backslash)$(openingbrace)/g; \
-		s/$(backslash)$(closingbrace)/$(backlash)$(backslash)$(backslash)$(closingbrace)/g; \
-	")
+	sed -E "s/#define ([^ ]*) (.*)/'-D\1=\2'/g;")
 
 CXXMACROS := $(shell $(CXX) $(CXXFLAGS) -E -dM -xc++ /dev/null 2> /dev/stdout | \
-	sed -E "s/#define ([^ ]*) $(quote)?([^$(quote)]*)$(quote)?/-D\1=$(quote)\2$(quote)/g; \
-		s/$(backslash)$(openingbrace)/$(backlash)$(backslash)$(backslash)$(openingbrace)/g; \
-		s/$(backslash)$(closingbrace)/$(backlash)$(backslash)$(backslash)$(closingbrace)/g; \
-	")
+	sed -E "s/#define ([^ ]*) (.*)/'-D\1=\2'/g;")
 
 # cool, cppcheck reports an internalAstError:
 # /usr/include/c++/12/bits/stl_iterator.h:201:7: error: Syntax Error: AST broken, '__x' doesn't have a parent.
