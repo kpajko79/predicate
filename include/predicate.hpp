@@ -366,18 +366,17 @@ public:                                                                         
   ~Match ## name ## Impl() noexcept override = default;                                                                        \
                                                                                                                                \
 private:                                                                                                                       \
-  inline bool executeHelper2(bool (&func)(const Encapsulator&), Encapsulator& what) const noexcept                             \
+  static inline bool executeHelper2(bool (&func)(const Encapsulator&), Encapsulator& what) noexcept                            \
   {                                                                                                                            \
     return func(what);                                                                                                         \
   }                                                                                                                            \
                                                                                                                                \
-  inline bool executeHelper2(std::function<bool(const Encapsulator&)>&& func,                                                  \
-    const Encapsulator& what) const noexcept                                                                                   \
+  static inline bool executeHelper2(std::function<bool(const Encapsulator&)>&& func, const Encapsulator& what) noexcept        \
   {                                                                                                                            \
     return func(what);                                                                                                         \
   }                                                                                                                            \
                                                                                                                                \
-  inline bool executeHelper2(const void* func, const Encapsulator& what) const noexcept                                        \
+  static inline bool executeHelper2(const void* func, const Encapsulator& what) noexcept                                       \
   {                                                                                                                            \
     auto predicate = reinterpret_cast<const Predicate*>(func);                                                                 \
     return predicate->execute(what);                                                                                           \
