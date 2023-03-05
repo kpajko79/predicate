@@ -31,9 +31,7 @@
 #include "handicap_ostringstream.hpp"
 #include "compiler_support.hpp"
 
-#if defined(PKO_PREDICATE_ENABLE_BACKTRACE) && !defined(PKO_PREDICATE_DEBUGBREAK)
 #include "unwind_tool.hpp"
-#endif
 
 #include <memory>
 #include <cassert>
@@ -187,6 +185,7 @@ inline std::tuple<bool, const T(&)[N]> Decapsulate(const Encapsulator& what) noe
 
   auto result = PKO_PREDICATE_LOGGER(ti.hash_code() == what.hash_code(),
       "The actual value has type '"
+
       << ::pajko::tools::Unwinder::decodeTypeName(what.type_name())
       << "' while the expected was '"
       << ::pajko::tools::Unwinder::decodeTypeName(ti.name())

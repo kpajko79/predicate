@@ -27,12 +27,15 @@
 
 #pragma once
 
+#if defined(PKO_PREDICATE_ENABLE_BACKTRACE)
 // hell no, can't play nice to include with the folder
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
 #undef UNW_LOCAL_ONLY
 
 #include <dlfcn.h>
+#endif
+
 #include <cxxabi.h>
 
 #include <sstream>
@@ -53,10 +56,12 @@ public:
     return instance;
   }
 
+#if defined(PKO_PREDICATE_ENABLE_BACKTRACE)
   static std::string go() noexcept
   {
     return get().unwind();
   }
+#endif
 
   static std::string demangle(const char *symbol) noexcept
   {
@@ -99,6 +104,7 @@ private:
     return std::string{ symbol };
   }
 
+#if defined(PKO_PREDICATE_ENABLE_BACKTRACE)
   std::string resolve(unw_word_t ip, unw_word_t sp) const noexcept
   {
     std::ostringstream result;
@@ -162,6 +168,7 @@ private:
 
     return result.str();
   }
+#endif
 };
 
 }; /* namespace tools */
