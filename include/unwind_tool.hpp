@@ -108,8 +108,7 @@ private:
     result << "in " << reinterpret_cast<const void*>(ip);
     status = dladdr(reinterpret_cast<const void*>(ip), &info);
     if (status && info.dli_fname && info.dli_fname[0] != '\0') {
-      if (info.dli_fname) result << " " << info.dli_fname;
-      result << " (";
+      result << " " << info.dli_fname << " (";
 
       if (!info.dli_sname) {
         info.dli_saddr = info.dli_fbase;
