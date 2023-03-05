@@ -24,6 +24,9 @@
 #
 #  For more information, please refer to <https://unlicense.org>
 #
+#
+#  SPDX-License-Identifier: Unlicense
+#
 
 CPP := gcc
 CC := gcc
