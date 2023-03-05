@@ -81,12 +81,15 @@ public:
 
 private:
   Unwinder() noexcept = default;
+  Unwinder(const Unwinder&) = delete;
+  Unwinder& operator=(const Unwinder&) = delete;
 
-  std::string demangleHelper(const char* symbol) const noexcept
+  static std::string demangleHelper(const char* symbol) noexcept
   {
     size_t size = 128;
     int status;
 
+    // "do not manage memory manually" hahaha...
     auto buffer = std::unique_ptr<char, decltype(&std::free)>(static_cast<char*>(std::malloc(size)), &std::free);
     auto demangled = abi::__cxa_demangle(symbol, buffer.get(), &size, &status);
     if (demangled) {

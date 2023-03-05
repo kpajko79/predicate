@@ -44,6 +44,8 @@ private:
   using stream_type = std::basic_ostream<CharT, Traits>;
 
 public:
+  ~handicap_ostringstream() noexcept = default;
+
   handicap_ostringstream() noexcept
     : stream(std::ios_base::out)
   {}
@@ -141,7 +143,7 @@ public:
     handicap_ostringstream&
   >::type
   {
-    stream << std::move(static_cast<signed int>(c));
+    stream << static_cast<signed int>(c);
     return *this;
   }
 
@@ -157,7 +159,7 @@ public:
     handicap_ostringstream&
   >::type
   {
-    stream << std::move(static_cast<unsigned int>(c));
+    stream << static_cast<unsigned int>(c);
     return *this;
   }
 
@@ -216,10 +218,13 @@ public:
   }
 
 private:
+  handicap_ostringstream(const handicap_ostringstream&) = delete;
+  handicap_ostringstream& operator=(const handicap_ostringstream&) = delete;
+
   template <typename T>
   handicap_ostringstream& printArray(const T* a, size_t n) noexcept
   {
-    size_t i, m = n;
+    size_t m = n;
 
 #if defined(PKO_STREAM_ARRAY_LIMIT)
     if (m > PKO_STREAM_ARRAY_LIMIT) m = PKO_STREAM_ARRAY_LIMIT;
@@ -228,11 +233,11 @@ private:
     stream << "< ";
     operator<<(n);
     stream << " |";
-    for (i = 0; i < m; i++) {
+    for (size_t i = 0; i < m; i++) {
       stream << " ";
       operator<<(a[i]);
     }
-    if (n > m) stream << "...";
+    if (n > m) { stream << "..."; }
     stream << " >";
 
     return *this;

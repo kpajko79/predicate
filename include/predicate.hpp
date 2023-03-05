@@ -100,6 +100,8 @@ public:
 
 protected:
   Encapsulator() noexcept = default;
+  Encapsulator(const Encapsulator&) noexcept = default;
+  Encapsulator& operator=(const Encapsulator&) = delete;
 };
 
 class Predicate
@@ -110,6 +112,8 @@ public:
 
 protected:
   Predicate() noexcept = default;
+  Predicate(const Predicate&) = delete;
+  Predicate& operator=(const Predicate&) = delete;
 };
 
 namespace impl {
@@ -122,6 +126,7 @@ class EncapsulatorImpl : public Encapsulator
 public:
   EncapsulatorImpl() noexcept = delete;
   ~EncapsulatorImpl() noexcept override = default;
+  EncapsulatorImpl(const EncapsulatorImpl&) noexcept = default;
 
   explicit EncapsulatorImpl(const T& what) noexcept
     : _what(what)
@@ -144,6 +149,8 @@ public:
   }
 
 private:
+  EncapsulatorImpl& operator=(const EncapsulatorImpl&) = delete;
+
   const T _what;
   const std::type_info& _ti;
 };
@@ -249,6 +256,9 @@ public:
   ~WithArgsImpl() noexcept override = default;
 
 private:
+  WithArgsImpl(const WithArgsImpl&) = delete;
+  WithArgsImpl& operator=(const WithArgsImpl&) = delete;
+
   template <std::size_t... Is>
   inline bool executeHelper(const Encapsulator& what, detail::index_sequence<Is...>) const noexcept
   {
@@ -301,6 +311,9 @@ public:                                                                         
   ~name ## Impl() noexcept override = default;                                                                \
                                                                                                               \
 private:                                                                                                      \
+  name ## Impl(const name ## Impl&) = delete;                                                                 \
+  name ## Impl& operator=(const name ## Impl&) = delete;                                                      \
+                                                                                                              \
   template <typename U = T>                                                                                   \
   inline auto executeHelper(const Encapsulator& what) const noexcept ->                                       \
     typename std::enable_if<                                                                                  \
@@ -368,6 +381,9 @@ public:                                                                         
   ~Match ## name ## Impl() noexcept override = default;                                                                        \
                                                                                                                                \
 private:                                                                                                                       \
+  Match ## name ## Impl(const Match ## name ## Impl&) = delete;                                                                \
+  Match ## name ## Impl& operator=(const Match ## name ## Impl&) = delete;                                                     \
+                                                                                                                               \
   static inline bool executeHelper2(bool (&func)(const Encapsulator&), Encapsulator& what) noexcept                            \
   {                                                                                                                            \
     return func(what);                                                                                                         \
@@ -493,6 +509,9 @@ public:
   ~IsEqualImpl() noexcept override = default;
 
 private:
+  IsEqualImpl(const IsEqualImpl&) = delete;
+  IsEqualImpl& operator=(const IsEqualImpl&) = delete;
+
   explicit IsEqualImpl(const T (&arg)[N]) noexcept
   {
     std::memcpy(_arg, arg, N * sizeof(T));
@@ -535,6 +554,9 @@ public:
   ~IsEqualImpl() noexcept override = default;
 
 private:
+  IsEqualImpl(const IsEqualImpl&) = delete;
+  IsEqualImpl& operator=(const IsEqualImpl&) = delete;
+
   explicit IsEqualImpl(T&& arg) noexcept
     : _arg(std::move(arg))
   {}
@@ -600,6 +622,9 @@ public:                                                                         
   ~name ## Impl() noexcept override = default;                                                  \
                                                                                                 \
 private:                                                                                        \
+  name ## Impl(const name ## Impl&) = delete;                                                   \
+  name ## Impl& operator=(const name ## Impl&) = delete;                                        \
+                                                                                                \
   name ## Impl() noexcept                                                                       \
   {}                                                                                            \
 };                                                                                              \
@@ -744,6 +769,9 @@ public:                                                                         
   ~name ## Impl() noexcept override = default;                                                  \
                                                                                                 \
 private:                                                                                        \
+  name ## Impl(const name ## Impl&) = delete;                                                   \
+  name ## Impl& operator=(const name ## Impl&) = delete;                                        \
+                                                                                                \
   explicit name ## Impl(T&& param) noexcept                                                     \
     : _param(std::move(param))                                                                  \
   {}                                                                                            \
@@ -851,6 +879,9 @@ public:                                                                         
   ~name ## Impl() noexcept override = default;                                                           \
                                                                                                          \
 private:                                                                                                 \
+  name ## Impl(const name ## Impl&) = delete;                                                            \
+  name ## Impl& operator=(const name ## Impl&) = delete;                                                 \
+                                                                                                         \
   name ## Impl(T&& p1, T&& p2) noexcept                                                                  \
     : _p1(std::move(p1))                                                                                 \
     , _p2(std::move(p2))                                                                                 \
@@ -875,7 +906,7 @@ PKO_PREDICATE_FILTER_GENERATOR_2PARAM(IsEqualEpsilon, return (arg >= param1) ? (
 
 #undef PKO_PREDICATE_FILTER_GENERATOR_2PARAM
 
-bool PredicateExecHelper(const void* expected, const void* actual) noexcept
+static bool PredicateExecHelper(const void* expected, const void* actual) noexcept
 {
   auto predicate = reinterpret_cast<const Predicate*>(expected);
   return predicate->execute(*reinterpret_cast<const Encapsulator*>(actual));
